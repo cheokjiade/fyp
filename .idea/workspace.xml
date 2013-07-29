@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="d25f7136-0cd6-4109-8567-069aa8bb3973" name="Default" comment="" />
-    <list id="a582af4f-d050-4317-b744-eb54dbb6a5ae" name="New changelist" comment="" />
+    <list default="true" id="d25f7136-0cd6-4109-8567-069aa8bb3973" name="Default" comment="test">
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+    </list>
+    <list id="a582af4f-d050-4317-b744-eb54dbb6a5ae" name="New changelist" comment="New changelist" />
     <ignored path="fyp.iws" />
     <ignored path=".idea/workspace.xml" />
     <file path="/a.sql" changelist="d25f7136-0cd6-4109-8567-069aa8bb3973" time="1369326337328" ignored="false" />
@@ -250,7 +252,7 @@
     <file path="$APPLICATION_HOME_DIR$/plugins/WebServices/lib/WebServices.jar!/schemas/resources/Axis2.services.xml" changelist="d25f7136-0cd6-4109-8567-069aa8bb3973" time="1371451457424" ignored="false" />
     <file path="$APPLICATION_HOME_DIR$/plugins/JavaEE/lib/javaee-impl.jar!/standardSchemas/ejb-jar_2_1.xsd" changelist="d25f7136-0cd6-4109-8567-069aa8bb3973" time="1371451457424" ignored="false" />
     <file path="$APPLICATION_HOME_DIR$/plugins/JavaEE/lib/javaee-impl.jar!/standardSchemas/application_1_4.xsd" changelist="d25f7136-0cd6-4109-8567-069aa8bb3973" time="1371451457424" ignored="false" />
-    <file path="/Dummy.txt" changelist="d25f7136-0cd6-4109-8567-069aa8bb3973" time="1375079651372" ignored="false" />
+    <file path="/Dummy.txt" changelist="d25f7136-0cd6-4109-8567-069aa8bb3973" time="1375080469124" ignored="false" />
     <file path="/gcm.php" changelist="d25f7136-0cd6-4109-8567-069aa8bb3973" time="1373992086737" ignored="false" />
     <file path="/form.php" changelist="d25f7136-0cd6-4109-8567-069aa8bb3973" time="1374825022736" ignored="false" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -317,7 +319,17 @@
     <favorites_list name="fyp" />
   </component>
   <component name="FileEditorManager">
-    <leaf />
+    <leaf>
+      <file leaf-file-name="index.php" pinned="false" current="true" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/io/index.php">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="10" column="43" selection-start="432" selection-end="442" vertical-scroll-proportion="0.46575344">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+    </leaf>
   </component>
   <component name="FindManager">
     <FindUsagesManager>
@@ -325,6 +337,7 @@
     </FindUsagesManager>
   </component>
   <component name="Git.Settings">
+    <option name="UPDATE_TYPE" value="MERGE" />
     <option name="SYNC_SETTING" value="DONT" />
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
     <option name="RECENT_BRANCH_BY_REPOSITORY">
@@ -423,6 +436,20 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="fyp" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="fyp" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="io" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
         </subPane>
       </pane>
     </panes>
@@ -432,6 +459,7 @@
     <property name="GoToFile.includeJavaFiles" value="false" />
     <property name="project.structure.proportion" value="0.15" />
     <property name="options.splitter.main.proportions" value="0.3" />
+    <property name="ChangesBrowser.SHOW_FLATTEN" value="true" />
     <property name="options.lastSelected" value="project.propVCSSupport.Confirmation" />
     <property name="MemberChooser.sorted" value="false" />
     <property name="recentsLimit" value="5" />
@@ -618,10 +646,10 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-8" y="-8" width="1382" height="744" extended-state="7" />
+    <frame x="-8" y="-8" width="1382" height="744" extended-state="6" />
     <editor active="false" />
     <layout>
-      <window_info id="Changes" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.31527093" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.31527093" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="JetGradle" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25603864" sideWeight="0.6008919" order="4" side_tool="false" content_ui="tabs" />
@@ -639,7 +667,7 @@
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Application Servers" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.1193265" sideWeight="0.68472904" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.1193265" sideWeight="0.68472904" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Database Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.37755102" sideWeight="0.5" order="11" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
@@ -790,16 +818,14 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/io/form.php">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="299" column="64" selection-start="9885" selection-end="9885" vertical-scroll-proportion="0.31203008">
-          <folding>
-            <marker date="1374825058053" expanded="true" signature="-1:-1" placeholder="..." />
-          </folding>
+        <state line="309" column="36" selection-start="10096" selection-end="10096" vertical-scroll-proportion="0.80273974">
+          <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/io/index.php">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="10" column="43" selection-start="432" selection-end="442" vertical-scroll-proportion="0.31954888">
+        <state line="10" column="43" selection-start="432" selection-end="442" vertical-scroll-proportion="0.46575344">
           <folding />
         </state>
       </provider>
