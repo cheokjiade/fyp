@@ -289,6 +289,20 @@ $as++;
                     <tr id="sp1rs1">
                         <td>Resource Name</td>
                     </tr>
+                    <tr>
+                        <td>Unit of Measure</td>
+                        <td>Included</td>
+                        <td>Min</td>
+                        <td>Max</td>
+                        <td>Setup Fee</td>
+                        <td>Charge Per Unit</td>
+                        <td>Store Price Sample Text</td>
+                        <td>Availablity</td>
+                        <td>Show in Store</td>
+                        <td>Show in CCP</td>
+                        <td>Measurable</td>
+
+                    </tr>
                 </table>
             </td>
         </tr>

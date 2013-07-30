@@ -11,7 +11,7 @@ if($_REQUEST['action']) {
     $action = $_REQUEST['action'];
     switch($action){
         case "location":
-
+            $locJson = $_REQUEST[''];
             break;
     }
 }

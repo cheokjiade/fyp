@@ -1,0 +1,28 @@
+Objectives of Tracking
+
+Actions
+-Track Location Data at 5-15second intervals.
+-Track ON/OFF events
+-Track unlock events
+-Track Device details on register
+-Track SIM number and Operator Name at 10min intervals
+-Track Connected Network Operator name at 10min intervals
+-Track List of WiFi hotspots at 10min intervals
+-Track List of running tasks at 10min intervals
+
+
+Interactions
+-Track Received and Sent Numbers from any incoming/outgoing SMS.
+-Call Logs : Number, duration, incomming/outgoing
+
+NOT Tracked
+Actions
+-Photo/Media taken : Not reliable
+-Envrionmental Volume: Requires active audio stream
+-gyroscope data, compass data
+-ambient light data
+
+
+Interactions
+-Messaging apps(whatsapp,line), voip apps : not able to track
+
