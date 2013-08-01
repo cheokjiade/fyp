@@ -1,4 +1,3 @@
-
 <?php
 // In PHP versions earlier than 4.1.0, $HTTP_POST_FILES should be used instead
 // of $_FILES.
@@ -44,7 +43,7 @@ $xml = simplexml_load_string($xmlString);
         }
         var selectContents = "";
         for(var i =0; i< resourceArray.length; i++){
-            selectContents += "\<option\>" + resourceArray[i].rName + "\</option\>";
+            selectContents += "\<option class=\"resClass."+ resourceArray[i].rId +"\"\>" + resourceArray[i].rName + "\</option\>";
         }
         $('.rsSelect').html(selectContents);
 
@@ -56,6 +55,9 @@ $xml = simplexml_load_string($xmlString);
         function begin(){
             //this.append('Click somewhere else to submit');
         }
+        $(".resPeriodClone").click(function(){
+            $(this).parent().parent().clone(true).appendTo($(this).parent().parent().parent());
+        });
 
     });
 </script>
@@ -151,6 +153,7 @@ $as++;
         <?php } ?>
     </table>
 </div>
+    <h2 colspan="2">Service Resources</h2>
 <?php } ?>
 
 <!-- application services-->
@@ -161,6 +164,7 @@ $as++;
     ?>
 <script  type="text/javascript">
     //var mainServiceResource = <?php print $as ?>;
+    //function for cloning resources and updating the plan dropdownlists
     $(document).ready(function(){
         resourceCounter++;
         resourceArray.push(new Resource(2,<?php print $as?>,""));
@@ -170,7 +174,8 @@ $as++;
             //$("#resName.<?php print $as ?>",tmpClone).attr("id","resName."+resourceCounter);
             //alert($tmpClone.find("#resName.<?php print $as ?>").outerHTML);
             //tmpClone.find('td').eq(1).attr("id","resName."+resourceCounter);
-            $("td",tmpClone).eq(1).attr("id","resName."+resourceCounter);
+            //find the 2nd td element in the table, rename the id
+            $("td",tmpClone).eq(1).attr({id:"resName."+resourceCounter,class:"resClass."+resourceCounter});
             tmpClone.appendTo(".ds<?php print $as?>");
             resourceArray.push(new Resource(2,resourceCounter,"[Service]Enter Value"));
             updateResourceNames();
@@ -181,9 +186,7 @@ $as++;
 <div class="ds<?php print $as?>">
     <button id="bs<?php print $as?>">Clone</button>
 <table class="as<?php print $as?>">
-    <tr><th colspan="2">Service Resources</th></tr>
-
-        <tr>
+           <tr>
             <td><strong>[Service]<?php print $tmp->attributes()->id ?>: </strong></td>
             <td id="resName.<?php print $as?>" class="editable resourceName" onchange="updateResourceNames();">[Service]Enter Value<?php
                 $abc = new SimpleXMLElement($tmp->asXML());
@@ -330,30 +333,70 @@ $as++;
                 </script>-->
                 Resources
                 <!-- All resource selectors to have same class -->
-                <select id="sp1ressel" class="rsSelect"></select><button id="sp1addbn">Add</button>
+                <select id="sp1ressel" class="rsSelect"></select><button id="sp1addbn">Add</button><button onclick="updateResourceNames();">Refresh</button>
+                <script type="text/javascript">
+                    $(document).ready(function(){
+                        $('#sp1addbn').click(function(){
+                            var tmpRes = $("#sp1rst").clone(true);
+                            tmpRes.removeAttr("style");
+                            tmpRes.removeAttr("id");
+
+
+                            $("td",tmpRes).eq(0).attr({class:"resClass."+resourceArray[$("#sp1ressel")[0].selectedIndex].rId});
+                            $("td",tmpRes).eq(0).html(resourceArray[$("#sp1ressel")[0].selectedIndex].rName);
+                            tmpRes.appendTo("#sp1rstd");
+                        });
+                    });
+                </script>
             </th>
         </tr>
         <tr>
             <td colspan="2">
-                <table id="sp1rst">
-                    <tr id="sp1rs1">
-                        <td>Resource Name</td>
-                    </tr>
-                    <tr>
-                        <td>Unit of Measure</td>
-                        <td>Included</td>
-                        <td>Min</td>
-                        <td>Max</td>
-                        <td>Setup Fee</td>
-                        <td>Charge Per Unit</td>
-                        <td>Store Price Sample Text</td>
-                        <td>Availablity</td>
-                        <td>Show in Store</td>
-                        <td>Show in CCP</td>
-                        <td>Measurable</td>
+                <div id="sp1rstd">
+                    <table id="sp1rst" style="display: none;">
+                        <tr>
+                            <td id="sp1rsn0">Resource Name</td>
+                        </tr>
+                        <tr>
+                            <td>Unit of Measure</td>
+                            <td>Included</td>
+                            <td>Min</td>
+                            <td>Max</td>
+                            <td>Setup Fee</td>
+                            <td>Charge Per Unit</td>
+                            <td>Store Price Sample Text</td>
+                            <td>Availablity</td>
+                            <td>Show in Store</td>
+                            <td>Show in CCP</td>
+                            <td>Measurable</td>
 
-                    </tr>
-                </table>
+                        </tr>
+                        <tr>
+                            <td class="editable">Unit/Gb/GB</td>
+                            <td class="editable">Included</td>
+                            <td class="editable">Min</td>
+                            <td class="editable">Max</td>
+                            <td class="editable">Setup Fee</td>
+                            <td class="editable">Yes/No</td>
+                            <td class="editable">Store Price Sample Text</td>
+                            <td class="editable">Yes/No</td>
+                            <td class="editable">Yes/No</td>
+                            <td class="editable">Yes/No</td>
+                            <td class="editable">Yes/No</td>
+
+                        </tr>
+                        <tr>
+                            <td colspan="2"><strong>Pricing and Periods</strong></td>
+                        </tr>
+                        <tr>
+                            <td>Period: </td>
+                            <td class="editable"></td>
+                            <td>Price: </td>
+                            <td class="editable"></td>
+                            <td><button class="resPeriodClone">Add Period</button></td>
+                        </tr>
+                    </table>
+                </div>
             </td>
         </tr>
     </table>
