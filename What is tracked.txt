@@ -2,18 +2,27 @@ Objectives of Tracking
 
 Actions
 -Track Location Data at 5-15second intervals.
+	lat,lng,alt,accuracy/time
 -Track ON/OFF events
+	on/off/time
 -Track unlock events
+	lock/unlock/time
 -Track Device details on register
--Track SIM number and Operator Name at 10min intervals
+	device details/time
+-Track SIM number and Operator Name at startup.
+	sim number/operator name/time
 -Track Connected Network Operator name at 10min intervals
+	operator name/time
 -Track List of WiFi hotspots at 10min intervals
+	list of wifi ssid/time
 -Track List of running tasks at 10min intervals
 
 
 Interactions
 -Track Received and Sent Numbers from any incoming/outgoing SMS.
+	incomming/outgoing, number, time
 -Call Logs : Number, duration, incomming/outgoing
+	number,duration,incomming/outgoing, time
 
 NOT Tracked
 Actions

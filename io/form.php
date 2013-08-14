@@ -48,6 +48,7 @@ $xml = simplexml_load_string($xmlString);
         $('.rsSelect').html(selectContents);
 
     });
+    //to expose the jquery function so it can be called from onclick listener
     updateResourceNames();
     $(document).ready(function(){
         $('.editable').editable({onEdit:begin});
@@ -55,6 +56,7 @@ $xml = simplexml_load_string($xmlString);
         function begin(){
             //this.append('Click somewhere else to submit');
         }
+        //for cloning plan->resource->periods
         $(".resPeriodClone").click(function(){
             $(this).parent().parent().clone(true).appendTo($(this).parent().parent().parent());
         });

@@ -22,7 +22,13 @@ $sql = "SELECT userId FROM gcm;";
     <br>
     Currently the accepted format is:
     <br>
-    {"Id":3, "Expiry":"05-27-2013 00:00:00", "Content":"This is a test.", "Picture":"http://www.naturalhealth365.com/images/apple.jpg", "PictureLink":"http://google.com"}
+    left image
+    <br>
+    {"Id":6, "Expiry":"05-27-2013 00:00:00", "Content":"Lorem ipsum dolor sit amet, consectetur adipiscing elit.", "Picture":"http://jiade.cheok.org/100l.jpg", "PictureLink":"http://google.com", "Barcode":"APPWIZZ"}
+    <br>
+    right image
+    <br>
+    {"Id":6, "Expiry":"05-27-2013 00:00:00", "Content":"Lorem ipsum dolor sit amet, consectetur adipiscing elit.", "Picture":"http://jiade.cheok.org/100r.jpg", "PictureLink":"http://google.com", "Barcode":"APPWIZZ"}
     <br>
     <textarea cols="50" rows="15" name="message" wrap="soft"></textarea>
     <input type="submit" value="Submit">
