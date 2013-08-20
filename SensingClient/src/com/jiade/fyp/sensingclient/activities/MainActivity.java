@@ -1,13 +1,17 @@
 package com.jiade.fyp.sensingclient.activities;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 
+import com.db4o.ObjectContainer;
 import com.jiade.fyp.sensingclient.R;
+import com.jiade.fyp.sensingclient.db.Db4oHelper;
 import com.jiade.fyp.sensingclient.db.LocationDAO;
+import com.jiade.fyp.sensingclient.entities.Slocation;
 import com.jiade.fyp.sensingclient.json.LocationToJSONConverter;
 import com.jiade.fyp.sensingclient.services.SensingService;
 import com.jiade.fyp.sensingclient.settings.SensingSettings;
@@ -56,6 +60,7 @@ public class MainActivity extends Activity {
 	ProgressDialog pd;
 	TextView tvUsername,tvDetails;
 	Button bnRegister, bnLogin;
+	ArrayList<Slocation> arrayListLocation;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -63,6 +68,12 @@ public class MainActivity extends Activity {
 		setContentView(R.layout.activity_main);
 		prefs = this.getSharedPreferences(SensingSettings.PREFS, Context.MODE_PRIVATE);
 		tvUsername = (TextView)findViewById(R.id.main_info_tv);
+		ObjectContainer db = Db4oHelper.getInstance(getApplicationContext()).db();
+		List<Slocation> locationList = db.query(Slocation.class);
+		arrayListLocation = new ArrayList<Slocation>(locationList);
+		//db.store(new Slocation("lat", "lng", "alt", 20.0f, new Date()));
+		//db.store(new Slocation("lat1", "lng1", "alt1", 20.0f, new Date()));
+		db.close();
 		Intent startServiceIntent = new Intent(this,SensingService.class);
 		this.startService(startServiceIntent);
 		if(!loadPreferences()){

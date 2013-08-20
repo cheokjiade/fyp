@@ -1,13 +1,17 @@
 package com.jiade.fyp.sensingclient.services;
 
+import java.util.Date;
+
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.location.LocationClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
+import com.jiade.fyp.sensingclient.db.Db4oHelper;
 import com.jiade.fyp.sensingclient.db.LocationDAO;
 import com.jiade.fyp.sensingclient.entities.SensingLocation;
+import com.jiade.fyp.sensingclient.entities.Slocation;
 
 import android.app.Service;
 import android.content.Intent;
@@ -94,6 +98,8 @@ LocationListener{
         dao.createSensingLocation(sl);
         //Toast.makeText(this, "Size:" + Long.toString(dao.getRecords()), Toast.LENGTH_SHORT).show();
         dao.close();
+        Db4oHelper.getInstance(getApplicationContext()).db().store(new Slocation(Double.toString(arg0.getLatitude()), Double.toString(arg0.getLongitude()), Double.toString(arg0.getAltitude()), arg0.getAccuracy(), new Date()));
+        Db4oHelper.getInstance(getApplicationContext()).db().close();
         //Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
 		
 	}
