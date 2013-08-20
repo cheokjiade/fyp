@@ -26,7 +26,7 @@ public class SensingService extends Service implements
 GooglePlayServicesClient.ConnectionCallbacks,
 GooglePlayServicesClient.OnConnectionFailedListener,
 LocationListener{
-	
+	public static Location lastKnownLocation=null;
 	LocationClient mLocationClient;
 	LocationRequest mLocationRequest;
 	LocationDAO dao;
@@ -78,6 +78,7 @@ LocationListener{
 
 	@Override
 	public void onLocationChanged(Location arg0) {
+		lastKnownLocation = arg0;
 		 // Report to the UI that the location was updated
 //        String msg = "Lat: " +
 //                Double.toString(arg0.getLatitude()) + "\nLng: " +

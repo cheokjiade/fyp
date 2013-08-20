@@ -51,6 +51,20 @@ public class Slocation {
 	public void setLocationTimeStamp(Date locationTimeStamp) {
 		this.locationTimeStamp = locationTimeStamp;
 	}
+
+	/**
+	 * @return the objSMS
+	 */
+	public SSMS getObjSMS() {
+		return objSMS;
+	}
+
+	/**
+	 * @param objSMS the objSMS to set
+	 */
+	public void setObjSMS(SSMS objSMS) {
+		this.objSMS = objSMS;
+	}
 	
 	
 }

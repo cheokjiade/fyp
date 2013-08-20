@@ -11,6 +11,7 @@ import com.db4o.ObjectContainer;
 import com.jiade.fyp.sensingclient.R;
 import com.jiade.fyp.sensingclient.db.Db4oHelper;
 import com.jiade.fyp.sensingclient.db.LocationDAO;
+import com.jiade.fyp.sensingclient.entities.SSMS;
 import com.jiade.fyp.sensingclient.entities.Slocation;
 import com.jiade.fyp.sensingclient.json.LocationToJSONConverter;
 import com.jiade.fyp.sensingclient.services.SensingService;
@@ -33,6 +34,8 @@ import android.content.Intent;
 import android.content.DialogInterface.OnDismissListener;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.content.pm.ResolveInfo;
+import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -71,9 +74,15 @@ public class MainActivity extends Activity {
 		ObjectContainer db = Db4oHelper.getInstance(getApplicationContext()).db();
 		List<Slocation> locationList = db.query(Slocation.class);
 		arrayListLocation = new ArrayList<Slocation>(locationList);
+		ArrayList<SSMS> smsList = new ArrayList<SSMS>(db.query(SSMS.class));
 		//db.store(new Slocation("lat", "lng", "alt", 20.0f, new Date()));
 		//db.store(new Slocation("lat1", "lng1", "alt1", 20.0f, new Date()));
 		db.close();
+		Intent intent = new Intent("android.provider.Telephony.SMS_RECEIVED");
+		List<ResolveInfo> infos = getPackageManager().queryBroadcastReceivers(intent, 0);
+		for (ResolveInfo info : infos) {
+		    Log.w("MainActivity","Receiver name:" + info.activityInfo.name + "; priority=" + info.priority);
+		}
 		Intent startServiceIntent = new Intent(this,SensingService.class);
 		this.startService(startServiceIntent);
 		if(!loadPreferences()){

@@ -1,6 +1,12 @@
 package com.jiade.fyp.sensingclient.entities;
-
+/**
+ * int SMSIO
+ * 0 = Incomming
+ * 1 = Outgoing
+ */
 public class SSMS {
+	public static final int INCOMMING = 0;
+	public static final int OUTOGOING = 1;
 	/**
 	 * 0 = Incomming
 	 * 1 = Outgoing
