@@ -30,6 +30,121 @@
       <column name="id" sqlType="BIGINT UNSIGNED" length="20" precision="0" nullable="false" jdbcType="-5" autoIncrement="true"/>
       <primary-key name="PRIMARY" columns="id"/>
     </table>
+    <table name="activities" schema="" catalog="fyp" type="TABLE">
+      <column name="activities_id" sqlType="BIGINT" length="19" precision="0" nullable="false" jdbcType="-5" autoIncrement="true"/>
+      <column name="activities_name" sqlType="VARCHAR" length="255" precision="0" nullable="false" jdbcType="12"/>
+      <primary-key name="PRIMARY" columns="activities_id"/>
+      <exported-key name="foregroundtask_ibfk_2" table="foregroundtask" schema="" catalog="fyp" columns="activities_id"/>
+      <index name="activities_name" unique="true" columns="activities_name"/>
+    </table>
+    <table name="call" schema="" catalog="fyp" type="TABLE">
+      <column name="session_hash" sqlType="VARCHAR" length="255" precision="0" nullable="false" jdbcType="12"/>
+      <column name="location_time" sqlType="DATETIME" length="19" precision="0" nullable="false" jdbcType="93"/>
+      <column name="call_number" sqlType="VARCHAR" length="25" precision="0" nullable="false" jdbcType="12"/>
+      <column name="call_duration" sqlType="BIGINT" length="19" precision="0" nullable="false" jdbcType="-5"/>
+      <foreign-key name="call_ibfk_1" columns="session_hash,location_time" ref-table="phoneevents" ref-schema="" ref-catalog="fyp" ref-columns="session_hash,location_time" update-rule="3" delete-rule="3" deferrability="2"/>
+      <index name="session_hash" unique="false" columns="session_hash,location_time"/>
+    </table>
+    <table name="detectedwifi" schema="" catalog="fyp" type="TABLE">
+      <column name="session_hash" sqlType="VARCHAR" length="255" precision="0" nullable="false" jdbcType="12"/>
+      <column name="location_time" sqlType="DATETIME" length="19" precision="0" nullable="false" jdbcType="93"/>
+      <column name="wifissid_id" sqlType="BIGINT" length="19" precision="0" nullable="false" jdbcType="-5"/>
+      <foreign-key name="detectedwifi_ibfk_1" columns="session_hash,location_time" ref-table="phoneevents" ref-schema="" ref-catalog="fyp" ref-columns="session_hash,location_time" update-rule="3" delete-rule="3" deferrability="2"/>
+      <foreign-key name="detectedwifi_ibfk_2" columns="wifissid_id" ref-table="wifissid" ref-schema="" ref-catalog="fyp" ref-columns="wifissid_id" update-rule="3" delete-rule="3" deferrability="2"/>
+      <index name="session_hash" unique="false" columns="session_hash,location_time"/>
+    </table>
+    <table name="device" schema="" catalog="fyp" type="TABLE">
+      <column name="userdata_id" sqlType="BIGINT" length="19" precision="0" nullable="false" jdbcType="-5"/>
+      <column name="device_id" sqlType="VARCHAR" length="255" precision="0" nullable="false" jdbcType="12"/>
+      <column name="device_salt" sqlType="VARCHAR" length="255" precision="0" nullable="false" jdbcType="12"/>
+      <column name="device_details" sqlType="TEXT" length="65535" precision="0" nullable="true" jdbcType="-1"/>
+      <primary-key name="PRIMARY" columns="userdata_id,device_id"/>
+      <foreign-key name="device_ibfk_1" columns="userdata_id" ref-table="userdata" ref-schema="" ref-catalog="fyp" ref-columns="userdata_id" update-rule="3" delete-rule="3" deferrability="2"/>
+      <exported-key name="session_ibfk_1" table="session" schema="" catalog="fyp" columns="userdata_id,device_id"/>
+    </table>
+    <table name="foregroundtask" schema="" catalog="fyp" type="TABLE">
+      <column name="session_hash" sqlType="VARCHAR" length="255" precision="0" nullable="false" jdbcType="12"/>
+      <column name="location_time" sqlType="DATETIME" length="19" precision="0" nullable="false" jdbcType="93"/>
+      <column name="activities_id" sqlType="BIGINT" length="19" precision="0" nullable="false" jdbcType="-5"/>
+      <foreign-key name="foregroundtask_ibfk_1" columns="session_hash,location_time" ref-table="phoneevents" ref-schema="" ref-catalog="fyp" ref-columns="session_hash,location_time" update-rule="3" delete-rule="3" deferrability="2"/>
+      <foreign-key name="foregroundtask_ibfk_2" columns="activities_id" ref-table="activities" ref-schema="" ref-catalog="fyp" ref-columns="activities_id" update-rule="3" delete-rule="3" deferrability="2"/>
+      <index name="session_hash" unique="false" columns="session_hash,location_time"/>
+    </table>
+    <table name="location" schema="" catalog="fyp" type="TABLE">
+      <column name="session_hash" sqlType="VARCHAR" length="255" precision="0" nullable="false" jdbcType="12"/>
+      <column name="location_lat" sqlType="DOUBLE" length="22" precision="0" nullable="true" jdbcType="8"/>
+      <column name="location_lng" sqlType="DOUBLE" length="22" precision="0" nullable="true" jdbcType="8"/>
+      <column name="location_height" sqlType="DOUBLE" length="22" precision="0" nullable="true" jdbcType="8"/>
+      <column name="location_accuracy" sqlType="FLOAT" length="12" precision="0" nullable="true" jdbcType="7"/>
+      <column name="location_time" sqlType="DATETIME" length="19" precision="0" nullable="false" jdbcType="93"/>
+      <primary-key name="PRIMARY" columns="session_hash,location_time"/>
+      <foreign-key name="location_ibfk_1" columns="session_hash" ref-table="session" ref-schema="" ref-catalog="fyp" ref-columns="session_hash" update-rule="3" delete-rule="3" deferrability="2"/>
+      <exported-key name="phoneevents_ibfk_1" table="phoneevents" schema="" catalog="fyp" columns="session_hash,location_time"/>
+    </table>
+    <table name="network" schema="" catalog="fyp" type="TABLE">
+      <column name="session_hash" sqlType="VARCHAR" length="255" precision="0" nullable="false" jdbcType="12"/>
+      <column name="location_time" sqlType="DATETIME" length="19" precision="0" nullable="false" jdbcType="93"/>
+      <column name="network_operator" sqlType="VARCHAR" length="255" precision="0" nullable="false" jdbcType="12"/>
+      <foreign-key name="network_ibfk_1" columns="session_hash,location_time" ref-table="phoneevents" ref-schema="" ref-catalog="fyp" ref-columns="session_hash,location_time" update-rule="3" delete-rule="3" deferrability="2"/>
+      <index name="session_hash" unique="false" columns="session_hash,location_time"/>
+    </table>
+    <table name="phoneevents" schema="" catalog="fyp" type="TABLE">
+      <column name="session_hash" sqlType="VARCHAR" length="255" precision="0" nullable="false" jdbcType="12"/>
+      <column name="location_time" sqlType="DATETIME" length="19" precision="0" nullable="false" jdbcType="93"/>
+      <column name="phoneevents_event" sqlType="INT" length="10" precision="0" nullable="false" jdbcType="4"/>
+      <column name="phoneevents_action" sqlType="INT" length="10" precision="0" nullable="false" jdbcType="4"/>
+      <foreign-key name="phoneevents_ibfk_1" columns="session_hash,location_time" ref-table="location" ref-schema="" ref-catalog="fyp" ref-columns="session_hash,location_time" update-rule="3" delete-rule="3" deferrability="2"/>
+      <exported-key name="call_ibfk_1" table="call" schema="" catalog="fyp" columns="session_hash,location_time"/>
+      <exported-key name="detectedwifi_ibfk_1" table="detectedwifi" schema="" catalog="fyp" columns="session_hash,location_time"/>
+      <exported-key name="foregroundtask_ibfk_1" table="foregroundtask" schema="" catalog="fyp" columns="session_hash,location_time"/>
+      <exported-key name="network_ibfk_1" table="network" schema="" catalog="fyp" columns="session_hash,location_time"/>
+      <exported-key name="sim_ibfk_1" table="sim" schema="" catalog="fyp" columns="session_hash,location_time"/>
+      <exported-key name="sms_ibfk_1" table="sms" schema="" catalog="fyp" columns="session_hash,location_time"/>
+      <index name="session_hash" unique="false" columns="session_hash,location_time"/>
+    </table>
+    <table name="session" schema="" catalog="fyp" type="TABLE">
+      <column name="session_hash" sqlType="VARCHAR" length="255" precision="0" nullable="false" jdbcType="12"/>
+      <column name="userdata_id" sqlType="BIGINT" length="19" precision="0" nullable="false" jdbcType="-5"/>
+      <column name="device_id" sqlType="VARCHAR" length="255" precision="0" nullable="false" jdbcType="12"/>
+      <column name="session_timestamp" sqlType="DATETIME" length="19" precision="0" nullable="false" jdbcType="93"/>
+      <foreign-key name="session_ibfk_1" columns="userdata_id,device_id" ref-table="device" ref-schema="" ref-catalog="fyp" ref-columns="userdata_id,device_id" update-rule="3" delete-rule="3" deferrability="2"/>
+      <exported-key name="location_ibfk_1" table="location" schema="" catalog="fyp" columns="session_hash"/>
+      <index name="session_hash" unique="true" columns="session_hash"/>
+      <index name="userdata_id" unique="false" columns="userdata_id,device_id"/>
+    </table>
+    <table name="sim" schema="" catalog="fyp" type="TABLE">
+      <column name="session_hash" sqlType="VARCHAR" length="255" precision="0" nullable="false" jdbcType="12"/>
+      <column name="location_time" sqlType="DATETIME" length="19" precision="0" nullable="false" jdbcType="93"/>
+      <column name="sim_number" sqlType="VARCHAR" length="255" precision="0" nullable="false" jdbcType="12"/>
+      <column name="sim_operator" sqlType="VARCHAR" length="255" precision="0" nullable="false" jdbcType="12"/>
+      <foreign-key name="sim_ibfk_1" columns="session_hash,location_time" ref-table="phoneevents" ref-schema="" ref-catalog="fyp" ref-columns="session_hash,location_time" update-rule="3" delete-rule="3" deferrability="2"/>
+      <index name="session_hash" unique="false" columns="session_hash,location_time"/>
+    </table>
+    <table name="sms" schema="" catalog="fyp" type="TABLE">
+      <column name="session_hash" sqlType="VARCHAR" length="255" precision="0" nullable="false" jdbcType="12"/>
+      <column name="location_time" sqlType="DATETIME" length="19" precision="0" nullable="false" jdbcType="93"/>
+      <column name="sms_number" sqlType="INT" length="10" precision="0" nullable="false" jdbcType="4"/>
+      <foreign-key name="sms_ibfk_1" columns="session_hash,location_time" ref-table="phoneevents" ref-schema="" ref-catalog="fyp" ref-columns="session_hash,location_time" update-rule="3" delete-rule="3" deferrability="2"/>
+      <index name="session_hash" unique="false" columns="session_hash,location_time"/>
+    </table>
+    <table name="userdata" schema="" catalog="fyp" type="TABLE">
+      <column name="userdata_id" sqlType="BIGINT" length="19" precision="0" nullable="false" jdbcType="-5" autoIncrement="true"/>
+      <column name="userdata_email" sqlType="VARCHAR" length="255" precision="0" nullable="false" jdbcType="12"/>
+      <column name="userdata_password" sqlType="VARCHAR" length="255" precision="0" nullable="false" jdbcType="12"/>
+      <column name="userdata_hash" sqlType="VARCHAR" length="255" precision="0" nullable="true" jdbcType="12"/>
+      <column name="userdata_phonenumber" sqlType="VARCHAR" length="255" precision="0" nullable="true" jdbcType="12"/>
+      <primary-key name="PRIMARY" columns="userdata_id"/>
+      <exported-key name="device_ibfk_1" table="device" schema="" catalog="fyp" columns="userdata_id"/>
+      <index name="userdata_email" unique="true" columns="userdata_email"/>
+      <index name="userdata_hash" unique="true" columns="userdata_hash"/>
+    </table>
+    <table name="wifissid" schema="" catalog="fyp" type="TABLE">
+      <column name="wifissid_id" sqlType="BIGINT" length="19" precision="0" nullable="false" jdbcType="-5" autoIncrement="true"/>
+      <column name="wifissid_name" sqlType="VARCHAR" length="255" precision="0" nullable="false" jdbcType="12"/>
+      <primary-key name="PRIMARY" columns="wifissid_id"/>
+      <exported-key name="detectedwifi_ibfk_2" table="detectedwifi" schema="" catalog="fyp" columns="wifissid_id"/>
+      <index name="wifissid_name" unique="true" columns="wifissid_name"/>
+    </table>
     <table name="CHARACTER_SETS" schema="" catalog="information_schema" type="SYSTEM TABLE">
       <column name="CHARACTER_SET_NAME" sqlType="VARCHAR" length="32" precision="0" nullable="false" jdbcType="12" def="Jyc="/>
       <column name="DEFAULT_COLLATE_NAME" sqlType="VARCHAR" length="32" precision="0" nullable="false" jdbcType="12" def="Jyc="/>
