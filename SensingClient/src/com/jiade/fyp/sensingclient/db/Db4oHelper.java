@@ -16,10 +16,7 @@ public class Db4oHelper {
 	private static Context context; 
 
 	protected Db4oHelper(){
-		
-
 	}
-
 
 	public static Db4oHelper getInstance(Context context){
 		if (singleton==null){
