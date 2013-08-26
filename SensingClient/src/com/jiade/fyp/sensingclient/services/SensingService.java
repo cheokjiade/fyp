@@ -117,9 +117,9 @@ LocationListener{
 		dao = new LocationDAO(getApplicationContext());
 		mLocationRequest = LocationRequest.create();
 		mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-		mLocationRequest.setInterval(10000);
+		mLocationRequest.setInterval(15000);
         // Set the fastest update interval to 1 second
-        mLocationRequest.setFastestInterval(1000);
+        mLocationRequest.setFastestInterval(5000);
 		mLocationClient.requestLocationUpdates(mLocationRequest, this);
 		
 	}

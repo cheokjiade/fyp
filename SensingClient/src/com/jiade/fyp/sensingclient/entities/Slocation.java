@@ -10,6 +10,9 @@ public class Slocation {
 	private float locationAcc;
 	private Date locationTimeStamp;
 	private SSMS objSMS;
+	private SCall objCall;
+	private SActivity objActivity;
+	
 	
 	public Slocation(String locationLat, String locationLng,
 			String locationAlt, float locationAcc, Date locationTimeStamp) {
