@@ -14,6 +14,7 @@ import com.jiade.fyp.sensingclient.db.LocationDAO;
 import com.jiade.fyp.sensingclient.entities.SSMS;
 import com.jiade.fyp.sensingclient.entities.Slocation;
 import com.jiade.fyp.sensingclient.json.LocationToJSONConverter;
+import com.jiade.fyp.sensingclient.services.ActivityRecognitionService;
 import com.jiade.fyp.sensingclient.services.SensingService;
 import com.jiade.fyp.sensingclient.settings.SensingSettings;
 import com.jiade.fyp.sensingclient.util.DeviceUuidFactory;
@@ -85,6 +86,8 @@ public class MainActivity extends Activity {
 		}
 		Intent startServiceIntent = new Intent(this,SensingService.class);
 		this.startService(startServiceIntent);
+		Intent startActivityRecognitionIntent = new Intent(this,ActivityRecognitionService.class);
+		this.startService(startActivityRecognitionIntent);
 		if(!loadPreferences()){
 			bnRegister = (Button)findViewById(R.id.main_signup_bn);
 			bnLogin = (Button)findViewById(R.id.main_login_bn);

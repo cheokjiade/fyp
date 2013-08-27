@@ -5,6 +5,8 @@ import com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallback
 import com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.location.ActivityRecognitionClient;
+import com.google.android.gms.location.ActivityRecognitionResult;
+import com.google.android.gms.location.DetectedActivity;
 
 import android.app.Dialog;
 import android.app.IntentService;
@@ -14,17 +16,21 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
+import android.widget.Toast;
 
 public class ActivityRecognitionService extends IntentService implements ConnectionCallbacks, OnConnectionFailedListener{
 
+	// Flag that indicates if a request is underway.
+    private boolean mInProgress;
+    
 	// Stores the PendingIntent used to send activity recognition events back to the app
     private PendingIntent mActivityRecognitionPendingIntent;
 
     // Stores the current instantiation of the activity recognition client
     private ActivityRecognitionClient mActivityRecognitionClient;
-	public ActivityRecognitionService(String name) {
-		super(name);
-		// TODO Auto-generated constructor stub
+    
+	public ActivityRecognitionService() {
+		super("TestSensingActivityRecognition");
 	}
 
 	@Override
@@ -35,7 +41,7 @@ public class ActivityRecognitionService extends IntentService implements Connect
 
 	@Override
 	public void onConnected(Bundle arg0) {
-		// TODO Auto-generated method stub
+		mActivityRecognitionClient.requestActivityUpdates(10000, mActivityRecognitionPendingIntent);
 		
 	}
 
@@ -47,7 +53,12 @@ public class ActivityRecognitionService extends IntentService implements Connect
 
 	@Override
 	protected void onHandleIntent(Intent intent) {
-		// TODO Auto-generated method stub
+		if (ActivityRecognitionResult.hasResult(intent)) {
+	         ActivityRecognitionResult result = ActivityRecognitionResult.extractResult(intent);
+	         int i= result.getMostProbableActivity().getType();
+	         Log.w("ActivityRecognitionService", getNameFromType(i) +  Integer.toString(result.getActivityConfidence(i)));
+	         //Toast.makeText(getApplicationContext(), (result.getMostProbableActivity().getType()==DetectedActivity.STILL)?"Still":"Not Still", Toast.LENGTH_SHORT).show();
+	     }
 		
 	}
 	private boolean servicesConnected() {
@@ -92,6 +103,53 @@ public class ActivityRecognitionService extends IntentService implements Connect
         mActivityRecognitionPendingIntent =
                 PendingIntent.getService(this, 0, intent,
                 PendingIntent.FLAG_UPDATE_CURRENT);
+        mActivityRecognitionClient.connect();
 		super.onCreate();
 	}
+	
+	public void startUpdates() {
+        // Check for Google Play services
+
+        if (!servicesConnected()) {
+            return;
+        }
+        // If a request is not already underway
+        if (!mInProgress) {
+            // Indicate that a request is in progress
+            mInProgress = true;
+            // Request a connection to Location Services
+            mActivityRecognitionClient.connect();
+        //
+        } else {
+            /*
+             * A request is already underway. You can handle
+             * this situation by disconnecting the client,
+             * re-setting the flag, and then re-trying the
+             * request.
+             */
+        }
+	}
+	
+	/**
+     * Map detected activity types to strings
+     *@param activityType The detected activity type
+     *@return A user-readable name for the type
+     */
+    private String getNameFromType(int activityType) {
+        switch(activityType) {
+            case DetectedActivity.IN_VEHICLE:
+                return "in_vehicle";
+            case DetectedActivity.ON_BICYCLE:
+                return "on_bicycle";
+            case DetectedActivity.ON_FOOT:
+                return "on_foot";
+            case DetectedActivity.STILL:
+                return "still";
+            case DetectedActivity.UNKNOWN:
+                return "unknown";
+            case DetectedActivity.TILTING:
+                return "tilting";
+        }
+        return "unknown";
+    }
 }
