@@ -68,6 +68,22 @@ public class Slocation {
 	public void setObjSMS(SSMS objSMS) {
 		this.objSMS = objSMS;
 	}
+
+	public SCall getObjCall() {
+		return objCall;
+	}
+
+	public void setObjCall(SCall objCall) {
+		this.objCall = objCall;
+	}
+
+	public SActivity getObjActivity() {
+		return objActivity;
+	}
+
+	public void setObjActivity(SActivity objActivity) {
+		this.objActivity = objActivity;
+	}
 	
 	
 }

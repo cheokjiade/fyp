@@ -1,5 +1,7 @@
 package com.jiade.fyp.sensingclient.services;
 
+import java.util.Date;
+
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks;
 import com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener;
@@ -7,12 +9,17 @@ import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.location.ActivityRecognitionClient;
 import com.google.android.gms.location.ActivityRecognitionResult;
 import com.google.android.gms.location.DetectedActivity;
+import com.jiade.fyp.sensingclient.db.Db4oHelper;
+import com.jiade.fyp.sensingclient.entities.SActivity;
+import com.jiade.fyp.sensingclient.entities.SSMS;
+import com.jiade.fyp.sensingclient.entities.Slocation;
 
 import android.app.Dialog;
 import android.app.IntentService;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
+import android.location.Location;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
@@ -57,6 +64,13 @@ public class ActivityRecognitionService extends IntentService implements Connect
 	         ActivityRecognitionResult result = ActivityRecognitionResult.extractResult(intent);
 	         int i= result.getMostProbableActivity().getType();
 	         Log.w("ActivityRecognitionService", getNameFromType(i) +  Integer.toString(result.getActivityConfidence(i)));
+	         if(SensingService.lastKnownLocation!=null){
+	        	 Location lastKnownLocation = SensingService.lastKnownLocation;
+	             Slocation loc = new Slocation(Double.toString(lastKnownLocation.getLatitude()), Double.toString(lastKnownLocation.getLongitude()), Double.toString(lastKnownLocation.getAltitude()), lastKnownLocation.getAccuracy(), new Date());
+	             loc.setObjActivity(new SActivity(result.getMostProbableActivity().getType(), result.getMostProbableActivity().getConfidence(), 0, 0));
+	             Db4oHelper.getInstance(getApplicationContext()).db().store(loc);
+	             Db4oHelper.getInstance(getApplicationContext()).db().close();
+	         }
 	         //Toast.makeText(getApplicationContext(), (result.getMostProbableActivity().getType()==DetectedActivity.STILL)?"Still":"Not Still", Toast.LENGTH_SHORT).show();
 	     }
 		
