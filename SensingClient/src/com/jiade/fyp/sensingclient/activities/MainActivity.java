@@ -8,6 +8,7 @@ import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 
 import com.db4o.ObjectContainer;
+import com.db4o.query.Predicate;
 import com.google.gson.Gson;
 import com.jiade.fyp.sensingclient.R;
 import com.jiade.fyp.sensingclient.db.Db4oHelper;
@@ -76,6 +77,22 @@ public class MainActivity extends Activity {
 		ObjectContainer db = Db4oHelper.getInstance(getApplicationContext()).db();
 		final List<Slocation> locationList = db.query(Slocation.class);
 		arrayListLocation = new ArrayList<Slocation>(locationList);
+		final Date currentDate = new Date(System.currentTimeMillis() - 60 * 1000);
+		final List<Slocation> testLocations = db.query(new Predicate<Slocation>() {
+		    public boolean match(Slocation location) {
+		        return location.getLocationTimeStamp().after(currentDate);
+		    }
+		});
+		ArrayList <Slocation> locToDel = new ArrayList<Slocation>(db.query(new Predicate<Slocation>() {
+		    public boolean match(Slocation location) {
+		        return location.getLocationTimeStamp().before(currentDate);
+		    }
+		}));
+		for(Slocation tempSLoc : locToDel){
+			db.delete(tempSLoc);
+		}
+		db.commit();
+		//arrayListLocation = new ArrayList<Slocation>(testLocations);
 		ArrayList<SSMS> smsList = new ArrayList<SSMS>(db.query(SSMS.class));
 		//db.store(new Slocation("lat", "lng", "alt", 20.0f, new Date()));
 		//db.store(new Slocation("lat1", "lng1", "alt1", 20.0f, new Date()));
