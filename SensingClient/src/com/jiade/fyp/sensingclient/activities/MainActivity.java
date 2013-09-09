@@ -8,6 +8,7 @@ import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 
 import com.db4o.ObjectContainer;
+import com.google.gson.Gson;
 import com.jiade.fyp.sensingclient.R;
 import com.jiade.fyp.sensingclient.db.Db4oHelper;
 import com.jiade.fyp.sensingclient.db.LocationDAO;
@@ -73,7 +74,7 @@ public class MainActivity extends Activity {
 		prefs = this.getSharedPreferences(SensingSettings.PREFS, Context.MODE_PRIVATE);
 		tvUsername = (TextView)findViewById(R.id.main_info_tv);
 		ObjectContainer db = Db4oHelper.getInstance(getApplicationContext()).db();
-		List<Slocation> locationList = db.query(Slocation.class);
+		final List<Slocation> locationList = db.query(Slocation.class);
 		arrayListLocation = new ArrayList<Slocation>(locationList);
 		ArrayList<SSMS> smsList = new ArrayList<SSMS>(db.query(SSMS.class));
 		//db.store(new Slocation("lat", "lng", "alt", 20.0f, new Date()));
@@ -108,8 +109,10 @@ public class MainActivity extends Activity {
 						public void run() {
 							LocationDAO dao = new LocationDAO(getApplicationContext());
 							dao.open();
-							tvDetails.setText(LocationToJSONConverter.sensingLocationListToJSONString(dao.getAllSensingLocations()));
+							//tvDetails.setText(LocationToJSONConverter.sensingLocationListToJSONString(dao.getAllSensingLocations()));
 							dao.close();
+							Gson gson = new Gson();
+							tvDetails.setText(gson.toJson(arrayListLocation));
 							
 						}
 					});
