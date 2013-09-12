@@ -166,4 +166,13 @@ public class ActivityRecognitionService extends IntentService implements Connect
         }
         return "unknown";
     }
+
+	/* (non-Javadoc)
+	 * @see android.app.IntentService#onStartCommand(android.content.Intent, int, int)
+	 */
+	@Override
+	public int onStartCommand(Intent intent, int flags, int startId) {
+		//return super.onStartCommand(intent, flags, startId);
+		return START_STICKY;
+	}
 }

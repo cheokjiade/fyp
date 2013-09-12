@@ -7,6 +7,10 @@
         $count++;
         if(array_key_exists('objSMS',$item))
             $countSMS++;
+        //Sep 9, 2013 4:19:14 PM
+        $my_date = date('D, d M Y H:i:s T', strtotime($item['locationTimeStamp']));
+        //$ymd = DateTime::createFromFormat('M d, Y hh:MM:II meridian', $item['locationTimeStamp'])->format('Y-m-d');
+        print $my_date;
     }
     print "There are " . $count . ' items and ' . $countSMS . ' sms';
     print "<pre>";
