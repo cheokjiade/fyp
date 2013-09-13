@@ -23,7 +23,7 @@ ini_set('display_errors', 'On');
         $query->bindParam(":location_lng", $item['locationLng']);
         $query->bindParam(":location_height", $item['locationAlt']);
         $query->bindParam(":location_accuracy", $item['locationAcc']);
-        $query->bindParam(":location_time", strtotime($item['locationTimeStamp']));
+        $query->bindParam(":location_time", date('Y-m-d H:i:s',strtotime($item['locationTimeStamp'])));
         $query->execute();
         $lastTime = $item['locationTimeStamp'];
 //        $count++;
