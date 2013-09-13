@@ -1,11 +1,31 @@
 package com.jiade.fyp.sensingclient.services;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
+
+import com.db4o.ObjectContainer;
+import com.db4o.query.Predicate;
+import com.google.gson.Gson;
+import com.jiade.fyp.sensingclient.db.Db4oHelper;
+import com.jiade.fyp.sensingclient.entities.SensingClientJSONContainer;
+import com.jiade.fyp.sensingclient.entities.Slocation;
+import com.jiade.fyp.sensingclient.settings.SensingSettings;
+import com.jiade.fyp.sensingclient.util.HTTPHandler;
+import com.jiade.fyp.sensingclient.util.HTTPHandler.OnResponseReceivedListener;
 
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.IBinder;
@@ -14,6 +34,11 @@ public class ServerConnectionService extends Service {
 
 	private TimerTask task;
 	private Timer timer;
+	private SharedPreferences prefs;
+	private HTTPHandler httpHandler;
+	private ObjectContainer db;
+	private DateFormat formatter;
+	
 	@Override
 	public IBinder onBind(Intent intent) {
 		return null;
@@ -25,6 +50,29 @@ public class ServerConnectionService extends Service {
 	@Override
 	public void onCreate() {
 		super.onCreate();
+		db = Db4oHelper.getInstance(getApplicationContext()).db();
+		prefs = this.getSharedPreferences(SensingSettings.PREFS, Context.MODE_PRIVATE);
+		formatter = new SimpleDateFormat("dd MMM yyyy HH:mm:ss");
+		httpHandler = new HTTPHandler();
+		httpHandler.setOnResponseReceivedListener(new OnResponseReceivedListener() {
+			@Override
+			public void onResponseReceived(String receivedString, boolean success) {
+				try {
+					final Date date = formatter.parse(receivedString);
+					ArrayList <Slocation> locToDel = new ArrayList<Slocation>(db.query(new Predicate<Slocation>() {
+					    public boolean match(Slocation location) {
+					        return location.getLocationTimeStamp().before(date);
+					    }
+					}));
+					for(Slocation tempSLoc : locToDel){
+						db.delete(tempSLoc);
+					}
+					db.commit();
+				} catch (ParseException e) {
+					e.printStackTrace();
+				}
+			}
+		});
 	}
 
 	/* (non-Javadoc)
@@ -35,14 +83,14 @@ public class ServerConnectionService extends Service {
 		task = new TimerTask() {
             public void run() {
                 if (haveNetworkConnection()==2) {
-                    //myFunc();
-                } else {
-                	//timer.cancel();
+                	sendLocations();
+                } else if(haveNetworkConnection()==1){
+                	sendLocations();
                 }
             }
         };
         timer = new Timer();
-        timer.schedule(task, 500, 20*60*1000);
+        timer.schedule(task, 1*60*1000, 20*60*1000);
 		return START_STICKY;
 	}
 	
@@ -63,6 +111,19 @@ public class ServerConnectionService extends Service {
 	    if( haveConnectedWifi) return 2;
 	    if (haveConnectedMobile)return 1;
 	    else return 0;
+	}
+	
+	private void sendLocations(){
+		if(prefs.getString(SensingSettings.SESSION_HASH, null)!=null){
+			
+			
+			SensingClientJSONContainer s = new SensingClientJSONContainer(new ArrayList<Slocation>(db.query(Slocation.class)), prefs.getString(SensingSettings.SESSION_HASH, null));
+			Gson gson = new Gson();
+			List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
+			nameValuePairs.add(new BasicNameValuePair("location", gson.toJson(s)));
+			httpHandler.handleHTTP(nameValuePairs, SensingSettings.DOMAIN + "services/location.php");
+		}
+		
 	}
 
 }

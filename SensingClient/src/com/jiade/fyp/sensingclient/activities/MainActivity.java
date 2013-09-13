@@ -14,10 +14,12 @@ import com.jiade.fyp.sensingclient.R;
 import com.jiade.fyp.sensingclient.db.Db4oHelper;
 import com.jiade.fyp.sensingclient.db.LocationDAO;
 import com.jiade.fyp.sensingclient.entities.SSMS;
+import com.jiade.fyp.sensingclient.entities.SensingClientJSONContainer;
 import com.jiade.fyp.sensingclient.entities.Slocation;
 import com.jiade.fyp.sensingclient.json.LocationToJSONConverter;
 import com.jiade.fyp.sensingclient.services.ActivityRecognitionService;
 import com.jiade.fyp.sensingclient.services.SensingService;
+import com.jiade.fyp.sensingclient.services.ServerConnectionService;
 import com.jiade.fyp.sensingclient.settings.SensingSettings;
 import com.jiade.fyp.sensingclient.util.DeviceUuidFactory;
 import com.jiade.fyp.sensingclient.util.HTTPHandler;
@@ -78,25 +80,25 @@ public class MainActivity extends Activity {
 		final List<Slocation> locationList = db.query(Slocation.class);
 		arrayListLocation = new ArrayList<Slocation>(locationList);
 		final Date currentDate = new Date(System.currentTimeMillis() - 60 * 1000);
-		final List<Slocation> testLocations = db.query(new Predicate<Slocation>() {
-		    public boolean match(Slocation location) {
-		        return location.getLocationTimeStamp().after(currentDate);
-		    }
-		});
-		ArrayList <Slocation> locToDel = new ArrayList<Slocation>(db.query(new Predicate<Slocation>() {
-		    public boolean match(Slocation location) {
-		        return location.getLocationTimeStamp().before(currentDate);
-		    }
-		}));
-		for(Slocation tempSLoc : locToDel){
-			db.delete(tempSLoc);
-		}
-		db.commit();
+//		final List<Slocation> testLocations = db.query(new Predicate<Slocation>() {
+//		    public boolean match(Slocation location) {
+//		        return location.getLocationTimeStamp().after(currentDate);
+//		    }
+//		});
+//		ArrayList <Slocation> locToDel = new ArrayList<Slocation>(db.query(new Predicate<Slocation>() {
+//		    public boolean match(Slocation location) {
+//		        return location.getLocationTimeStamp().before(currentDate);
+//		    }
+//		}));
+//		for(Slocation tempSLoc : locToDel){
+//			db.delete(tempSLoc);
+//		}
+//		db.commit();
 		//arrayListLocation = new ArrayList<Slocation>(testLocations);
-		ArrayList<SSMS> smsList = new ArrayList<SSMS>(db.query(SSMS.class));
+		//ArrayList<SSMS> smsList = new ArrayList<SSMS>(db.query(SSMS.class));
 		//db.store(new Slocation("lat", "lng", "alt", 20.0f, new Date()));
 		//db.store(new Slocation("lat1", "lng1", "alt1", 20.0f, new Date()));
-		db.close();
+		
 		Intent intent = new Intent("android.provider.Telephony.SMS_RECEIVED");
 		List<ResolveInfo> infos = getPackageManager().queryBroadcastReceivers(intent, 0);
 		for (ResolveInfo info : infos) {
@@ -106,13 +108,24 @@ public class MainActivity extends Activity {
 		this.startService(startServiceIntent);
 		Intent startActivityRecognitionIntent = new Intent(this,ActivityRecognitionService.class);
 		this.startService(startActivityRecognitionIntent);
+		Intent startServerConnectionIntent = new Intent(this,ServerConnectionService.class);
+		this.startService(startServerConnectionIntent);
+		tvDetails = (TextView)findViewById(R.id.main_detailedinfo_tv);
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+			tvDetails.setTextIsSelectable(true);
+	    }
+		if(prefs.getString(SensingSettings.SESSION_HASH, null)!=null){
+			SensingClientJSONContainer s = new SensingClientJSONContainer(new ArrayList<Slocation>(db.query(Slocation.class)), prefs.getString(SensingSettings.SESSION_HASH, null));
+			Gson gson = new Gson();
+			tvDetails.setText(gson.toJson(s));
+			
+		}
+		db.close();
 		if(!loadPreferences()){
 			bnRegister = (Button)findViewById(R.id.main_signup_bn);
 			bnLogin = (Button)findViewById(R.id.main_login_bn);
-			tvDetails = (TextView)findViewById(R.id.main_detailedinfo_tv);
-			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-				tvDetails.setTextIsSelectable(true);
-		    }
+			
+			
 			bnRegister.setVisibility(View.VISIBLE);
 			bnLogin.setVisibility(View.VISIBLE);
 			handler = new Handler();
@@ -124,10 +137,10 @@ public class MainActivity extends Activity {
 						
 						@Override
 						public void run() {
-							LocationDAO dao = new LocationDAO(getApplicationContext());
-							dao.open();
+							//LocationDAO dao = new LocationDAO(getApplicationContext());
+							//dao.open();
 							//tvDetails.setText(LocationToJSONConverter.sensingLocationListToJSONString(dao.getAllSensingLocations()));
-							dao.close();
+							//dao.close();
 							Gson gson = new Gson();
 							tvDetails.setText(gson.toJson(arrayListLocation));
 							
