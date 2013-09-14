@@ -56,12 +56,15 @@
                 <action android:name="android.intent.action.NEW_OUTGOING_CALL" />
             </intent-filter>
         </receiver>
+        
         <service android:name=".services.ActivityRecognitionService" android:enabled="true"
             android:exported="true"></service>
+        
         <receiver android:name=".receivers.WifiConnectedReceiver">
             <intent-filter>
             </intent-filter>
         </receiver>
+        
         <service android:name=".services.ServerConnectionService"></service>
     </application>
 

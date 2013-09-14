@@ -15,6 +15,20 @@ public class Slocation {
 	
 	
 	public Slocation(String locationLat, String locationLng,
+			String locationAlt, float locationAcc, Date locationTimeStamp,
+			SSMS objSMS, SCall objCall, SActivity objActivity) {
+		super();
+		this.locationLat = locationLat;
+		this.locationLng = locationLng;
+		this.locationAlt = locationAlt;
+		this.locationAcc = locationAcc;
+		this.locationTimeStamp = locationTimeStamp;
+		this.objSMS = objSMS;
+		this.objCall = objCall;
+		this.objActivity = objActivity;
+	}
+
+	public Slocation(String locationLat, String locationLng,
 			String locationAlt, float locationAcc, Date locationTimeStamp) {
 		super();
 		this.locationLat = locationLat;

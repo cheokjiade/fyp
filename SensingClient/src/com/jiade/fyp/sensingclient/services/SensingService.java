@@ -95,11 +95,15 @@ LocationListener{
         		Double.toString(arg0.getAltitude()), 
         		Float.toString(arg0.getSpeed()), 
         		Float.toString(arg0.getAccuracy()));
-        dao.open();
-        dao.createSensingLocation(sl);
+        //dao.open();
+        //dao.createSensingLocation(sl);
         //Toast.makeText(this, "Size:" + Long.toString(dao.getRecords()), Toast.LENGTH_SHORT).show();
-        dao.close();
-        Db4oHelper.getInstance(getApplicationContext()).db().store(new Slocation(Double.toString(arg0.getLatitude()), Double.toString(arg0.getLongitude()), Double.toString(arg0.getAltitude()), arg0.getAccuracy(), new Date()));
+        //dao.close();
+        if(ActivityRecognitionService.getTempActivity() != null){
+        	Db4oHelper.getInstance(getApplicationContext()).db().store(new Slocation(Double.toString(arg0.getLatitude()), Double.toString(arg0.getLongitude()), Double.toString(arg0.getAltitude()), arg0.getAccuracy(), new Date(), null, null, ActivityRecognitionService.getTempActivity()));
+        }
+        else
+        	Db4oHelper.getInstance(getApplicationContext()).db().store(new Slocation(Double.toString(arg0.getLatitude()), Double.toString(arg0.getLongitude()), Double.toString(arg0.getAltitude()), arg0.getAccuracy(), new Date()));
         Db4oHelper.getInstance(getApplicationContext()).db().close();
         //Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
 		

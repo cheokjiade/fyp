@@ -75,6 +75,7 @@ public class MainActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+		Log.e("Log", "Start");
 		prefs = this.getSharedPreferences(SensingSettings.PREFS, Context.MODE_PRIVATE);
 		tvUsername = (TextView)findViewById(R.id.main_info_tv);
 		ObjectContainer db = Db4oHelper.getInstance(getApplicationContext()).db();
