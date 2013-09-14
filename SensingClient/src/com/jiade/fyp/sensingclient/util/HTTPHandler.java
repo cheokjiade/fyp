@@ -8,6 +8,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.HttpConnectionParams;
@@ -31,10 +32,15 @@ public class HTTPHandler {
 				HttpConnectionParams.setConnectionTimeout(client.getParams(), 10000); //Timeout Limit
 				HttpResponse response;
 				try{
-					HttpPost post = new HttpPost(url);
-					post.setEntity(new UrlEncodedFormEntity(nameValuePairs));
-					//Log.w("myapp",post.getEntity().toString());
-					response = client.execute(post);
+					if(nameValuePairs == null){
+						HttpGet get = new HttpGet(url);
+						response = client.execute(get);
+					}else{
+						HttpPost post = new HttpPost(url);
+						post.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+						//Log.w("myapp",post.getEntity().toString());
+						response = client.execute(post);
+					}
 					/*Checking response */
 					if(response!=null){
 						//String inputLine;

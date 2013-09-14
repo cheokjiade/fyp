@@ -63,7 +63,7 @@ public class ServerConnectionService extends Service {
 					final Date date = formatter.parse(receivedString);
 					ArrayList <Slocation> locToDel = new ArrayList<Slocation>(Db4oHelper.getInstance(getApplicationContext()).db().query(new Predicate<Slocation>() {
 					    public boolean match(Slocation location) {
-					        return location.getLocationTimeStamp().before(date);
+					        return location.getLocationTimeStamp().compareTo(date)<=0;
 					    }
 					}));
 					for(Slocation tempSLoc : locToDel){
