@@ -29,6 +29,7 @@ import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.IBinder;
+import android.util.Log;
 
 public class ServerConnectionService extends Service {
 
@@ -57,17 +58,19 @@ public class ServerConnectionService extends Service {
 		httpHandler.setOnResponseReceivedListener(new OnResponseReceivedListener() {
 			@Override
 			public void onResponseReceived(String receivedString, boolean success) {
+				Log.e("ServerConnectionService.httphandler", receivedString);
 				try {
 					final Date date = formatter.parse(receivedString);
-					ArrayList <Slocation> locToDel = new ArrayList<Slocation>(db.query(new Predicate<Slocation>() {
+					ArrayList <Slocation> locToDel = new ArrayList<Slocation>(Db4oHelper.getInstance(getApplicationContext()).db().query(new Predicate<Slocation>() {
 					    public boolean match(Slocation location) {
 					        return location.getLocationTimeStamp().before(date);
 					    }
 					}));
 					for(Slocation tempSLoc : locToDel){
-						db.delete(tempSLoc);
+						Db4oHelper.getInstance(getApplicationContext()).db().delete(tempSLoc);
 					}
-					db.commit();
+					Db4oHelper.getInstance(getApplicationContext()).db().commit();
+					Db4oHelper.getInstance(getApplicationContext()).db().close();
 				} catch (ParseException e) {
 					e.printStackTrace();
 				}
@@ -97,7 +100,6 @@ public class ServerConnectionService extends Service {
 	private int haveNetworkConnection() {
 	    boolean haveConnectedWifi = false;
 	    boolean haveConnectedMobile = false;
-
 	    ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
 	    NetworkInfo[] netInfo = cm.getAllNetworkInfo();
 	    for (NetworkInfo ni : netInfo) {
@@ -115,9 +117,8 @@ public class ServerConnectionService extends Service {
 	
 	private void sendLocations(){
 		if(prefs.getString(SensingSettings.SESSION_HASH, null)!=null){
-			
-			
-			SensingClientJSONContainer s = new SensingClientJSONContainer(new ArrayList<Slocation>(db.query(Slocation.class)), prefs.getString(SensingSettings.SESSION_HASH, null));
+			SensingClientJSONContainer s = new SensingClientJSONContainer(new ArrayList<Slocation>(Db4oHelper.getInstance(getApplicationContext()).db().query(Slocation.class)), prefs.getString(SensingSettings.SESSION_HASH, null));
+			db.close();
 			Gson gson = new Gson();
 			List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
 			nameValuePairs.add(new BasicNameValuePair("location", gson.toJson(s)));

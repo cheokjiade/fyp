@@ -42,19 +42,20 @@ public class ActivityRecognitionService extends IntentService implements Connect
 
 	@Override
 	public void onConnectionFailed(ConnectionResult arg0) {
-		// TODO Auto-generated method stub
+		Log.w("ActivityRecognitionService", "Connection Failed");
 		
 	}
 
 	@Override
 	public void onConnected(Bundle arg0) {
+		Log.w("ActivityRecognitionService", "Connected");
 		mActivityRecognitionClient.requestActivityUpdates(10000, mActivityRecognitionPendingIntent);
 		
 	}
 
 	@Override
 	public void onDisconnected() {
-		// TODO Auto-generated method stub
+		Log.w("ActivityRecognitionService", "Disconnected");
 		
 	}
 
