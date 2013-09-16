@@ -39,14 +39,24 @@ CREATE TABLE fyp.location
   foreign key (session_hash) references session(session_hash)
 );
 
-CREATE TABLE fyp.phoneevents
+CREATE TABLE fyp.humanactivity
 (
   session_hash varchar(255) NOT NULL,
   location_time datetime NOT NULL,
-  phoneevents_event INT NOT NULL, -- 1,STARTUP/SHUTDOWN;2,ON/OFF;3,LOCK/UNLOCK;4,SMS;5,CALL
-  phoneevents_action INT NOT NULL, -- 1,STARTUP/ON/LOCK/INCOMING
-  foreign key (session_hash, location_time) references location(session_hash, location_time)
+  humanactivity_probableactivity int NOT NULL,
+  humanactivity_probableactivityconfidence int NOT NULL,
+  foreign key (session_hash) references session(session_hash),
+  primary key (session_hash, location_time)
 );
+
+--CREATE TABLE fyp.phoneevents
+--(
+--  session_hash varchar(255) NOT NULL,
+--  location_time datetime NOT NULL,
+--  phoneevents_event INT NOT NULL, -- 1,STARTUP/SHUTDOWN;2,ON/OFF;3,LOCK/UNLOCK;4,SMS;5,CALL
+--  phoneevents_action INT NOT NULL, -- 1,STARTUP/ON/LOCK/INCOMING
+--  foreign key (session_hash, location_time) references location(session_hash, location_time)
+--);
 
 CREATE TABLE fyp.call
 (
