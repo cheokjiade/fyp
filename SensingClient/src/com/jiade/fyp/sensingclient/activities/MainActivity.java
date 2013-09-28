@@ -47,6 +47,7 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class MainActivity extends Activity {
 
@@ -62,7 +63,7 @@ public class MainActivity extends Activity {
 	String userEmail;
 	
 	SharedPreferences prefs;
-	HTTPHandler httpHandler;
+	HTTPHandler httpHandler, sampleHandler;
 	Handler handler;
 	Dialog dSignUp,dLogin;
 	ProgressDialog pd;
@@ -74,6 +75,7 @@ public class MainActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+		Log.e("Log", "Start");
 		prefs = this.getSharedPreferences(SensingSettings.PREFS, Context.MODE_PRIVATE);
 		tvUsername = (TextView)findViewById(R.id.main_info_tv);
 		ObjectContainer db = Db4oHelper.getInstance(getApplicationContext()).db();
@@ -121,6 +123,16 @@ public class MainActivity extends Activity {
 			
 		}
 		db.close();
+//		sampleHandler = new HTTPHandler();
+//		sampleHandler.setOnResponseReceivedListener(new OnResponseReceivedListener() {
+//			
+//			@Override
+//			public void onResponseReceived(String receivedString, boolean success) {
+//				Toast.makeText(getApplicationContext(), receivedString, Toast.LENGTH_SHORT).show();
+//				
+//			}
+//		});
+//		sampleHandler.handleHTTP(null, "http://maps.googleapis.com/maps/api/directions/json?mode=walking&origin=1.339287%2C103.706383&destination=1.338215%2C103.697223&sensor=true");
 		if(!loadPreferences()){
 			bnRegister = (Button)findViewById(R.id.main_signup_bn);
 			bnLogin = (Button)findViewById(R.id.main_login_bn);

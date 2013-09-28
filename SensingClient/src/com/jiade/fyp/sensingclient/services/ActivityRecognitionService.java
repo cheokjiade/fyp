@@ -27,6 +27,7 @@ import android.widget.Toast;
 
 public class ActivityRecognitionService extends IntentService implements ConnectionCallbacks, OnConnectionFailedListener{
 
+	private static SActivity tempActivity;
 	// Flag that indicates if a request is underway.
     private boolean mInProgress;
     
@@ -49,13 +50,14 @@ public class ActivityRecognitionService extends IntentService implements Connect
 	@Override
 	public void onConnected(Bundle arg0) {
 		Log.w("ActivityRecognitionService", "Connected");
-		mActivityRecognitionClient.requestActivityUpdates(10000, mActivityRecognitionPendingIntent);
+		mActivityRecognitionClient.requestActivityUpdates(4000, mActivityRecognitionPendingIntent);
 		
 	}
 
 	@Override
 	public void onDisconnected() {
 		Log.w("ActivityRecognitionService", "Disconnected");
+		mActivityRecognitionClient.connect();
 		
 	}
 
@@ -65,12 +67,14 @@ public class ActivityRecognitionService extends IntentService implements Connect
 	         ActivityRecognitionResult result = ActivityRecognitionResult.extractResult(intent);
 	         int i= result.getMostProbableActivity().getType();
 	         Log.w("ActivityRecognitionService", getNameFromType(i) +  Integer.toString(result.getActivityConfidence(i)));
+	         //Toast.makeText(getApplicationContext(), "ActivityRecognitionService" + getNameFromType(i), Toast.LENGTH_SHORT).show();
+	         tempActivity = new SActivity(result.getMostProbableActivity().getType(), result.getMostProbableActivity().getConfidence(), 0, 0);
 	         if(SensingService.lastKnownLocation!=null){
-	        	 Location lastKnownLocation = SensingService.lastKnownLocation;
-	             Slocation loc = new Slocation(Double.toString(lastKnownLocation.getLatitude()), Double.toString(lastKnownLocation.getLongitude()), Double.toString(lastKnownLocation.getAltitude()), lastKnownLocation.getAccuracy(), new Date());
-	             loc.setObjActivity(new SActivity(result.getMostProbableActivity().getType(), result.getMostProbableActivity().getConfidence(), 0, 0));
-	             Db4oHelper.getInstance(getApplicationContext()).db().store(loc);
-	             Db4oHelper.getInstance(getApplicationContext()).db().close();
+	        	 //Location lastKnownLocation = SensingService.lastKnownLocation;
+	             //Slocation loc = new Slocation(Double.toString(lastKnownLocation.getLatitude()), Double.toString(lastKnownLocation.getLongitude()), Double.toString(lastKnownLocation.getAltitude()), lastKnownLocation.getAccuracy(), new Date());
+	             //loc.setObjActivity(new SActivity(result.getMostProbableActivity().getType(), result.getMostProbableActivity().getConfidence(), 0, 0));
+	             //Db4oHelper.getInstance(getApplicationContext()).db().store(loc);
+	             //Db4oHelper.getInstance(getApplicationContext()).db().close();
 	         }
 	         //Toast.makeText(getApplicationContext(), (result.getMostProbableActivity().getType()==DetectedActivity.STILL)?"Still":"Not Still", Toast.LENGTH_SHORT).show();
 	     }
@@ -84,7 +88,7 @@ public class ActivityRecognitionService extends IntentService implements Connect
         // If Google Play services is available
         if (ConnectionResult.SUCCESS == resultCode) {
             // In debug mode, log the status
-            Log.d("Activity Recognition",
+            Log.w("Activity Recognition",
                     "Google Play services is available.");
             // Continue
             return true;
@@ -173,7 +177,14 @@ public class ActivityRecognitionService extends IntentService implements Connect
 	 */
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		//return super.onStartCommand(intent, flags, startId);
-		return START_STICKY;
+		return super.onStartCommand(intent, flags, startId);
+		//return START_STICKY;
+	}
+
+	/**
+	 * @return the tempActivity
+	 */
+	public static SActivity getTempActivity() {
+		return tempActivity;
 	}
 }

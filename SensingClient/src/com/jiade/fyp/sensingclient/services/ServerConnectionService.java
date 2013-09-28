@@ -4,6 +4,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Timer;
@@ -61,9 +62,13 @@ public class ServerConnectionService extends Service {
 				Log.e("ServerConnectionService.httphandler", receivedString);
 				try {
 					final Date date = formatter.parse(receivedString);
+					Calendar calender = Calendar.getInstance();
+		            calender.setTimeInMillis(date.getTime());
+		            calender.add(Calendar.SECOND, 1);
+		            final Date changeDate=calender.getTime();
 					ArrayList <Slocation> locToDel = new ArrayList<Slocation>(Db4oHelper.getInstance(getApplicationContext()).db().query(new Predicate<Slocation>() {
 					    public boolean match(Slocation location) {
-					        return location.getLocationTimeStamp().before(date);
+					        return location.getLocationTimeStamp().compareTo(changeDate)<=0;
 					    }
 					}));
 					for(Slocation tempSLoc : locToDel){
