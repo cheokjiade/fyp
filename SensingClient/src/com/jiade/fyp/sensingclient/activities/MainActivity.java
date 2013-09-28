@@ -78,7 +78,7 @@ public class MainActivity extends Activity {
 		tvUsername = (TextView)findViewById(R.id.main_info_tv);
 		ObjectContainer db = Db4oHelper.getInstance(getApplicationContext()).db();
 		final List<Slocation> locationList = db.query(Slocation.class);
-		arrayListLocation = new ArrayList<Slocation>(locationList);
+		arrayListLocation = new ArrayList<Slocation>(db.query(Slocation.class));
 		final Date currentDate = new Date(System.currentTimeMillis() - 60 * 1000);
 //		final List<Slocation> testLocations = db.query(new Predicate<Slocation>() {
 //		    public boolean match(Slocation location) {
