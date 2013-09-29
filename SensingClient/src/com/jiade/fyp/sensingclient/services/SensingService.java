@@ -12,6 +12,7 @@ import com.jiade.fyp.sensingclient.db.Db4oHelper;
 import com.jiade.fyp.sensingclient.db.LocationDAO;
 import com.jiade.fyp.sensingclient.entities.SensingLocation;
 import com.jiade.fyp.sensingclient.entities.Slocation;
+import com.nullwire.trace.ExceptionHandler;
 
 import android.app.Service;
 import android.content.Intent;
@@ -32,6 +33,7 @@ LocationListener{
 	LocationDAO dao;
 	@Override
 	public void onCreate() {
+		ExceptionHandler.register(this.getApplicationContext(), "http://fyp.cheok.org/stacktrace/server.php");
 		if(mLocationClient==null && isSupported()){
 			mLocationClient = new LocationClient(this, this, this);
 			mLocationClient.connect();
@@ -87,14 +89,14 @@ LocationListener{
 //                Float.toString(arg0.getAccuracy()) + "\nSpeed" +
 //                Float.toString(arg0.getSpeed()) + "\nTime" +
 //                Long.toString(arg0.getTime());
-        SensingLocation sl = new SensingLocation(
-        		-1l, 
-        		arg0.getTime(), 
-        		Double.toString(arg0.getLatitude()), 
-        		Double.toString(arg0.getLongitude()), 
-        		Double.toString(arg0.getAltitude()), 
-        		Float.toString(arg0.getSpeed()), 
-        		Float.toString(arg0.getAccuracy()));
+//        SensingLocation sl = new SensingLocation(
+//        		-1l, 
+//        		arg0.getTime(), 
+//        		Double.toString(arg0.getLatitude()), 
+//        		Double.toString(arg0.getLongitude()), 
+//        		Double.toString(arg0.getAltitude()), 
+//        		Float.toString(arg0.getSpeed()), 
+//        		Float.toString(arg0.getAccuracy()));
         //dao.open();
         //dao.createSensingLocation(sl);
         //Toast.makeText(this, "Size:" + Long.toString(dao.getRecords()), Toast.LENGTH_SHORT).show();
@@ -130,7 +132,7 @@ LocationListener{
 
 	@Override
 	public void onDisconnected() {
-		// TODO Auto-generated method stub
+		mLocationClient.connect();
 		
 	}
 }

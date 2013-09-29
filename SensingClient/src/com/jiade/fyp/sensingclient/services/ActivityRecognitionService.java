@@ -13,6 +13,7 @@ import com.jiade.fyp.sensingclient.db.Db4oHelper;
 import com.jiade.fyp.sensingclient.entities.SActivity;
 import com.jiade.fyp.sensingclient.entities.SSMS;
 import com.jiade.fyp.sensingclient.entities.Slocation;
+import com.nullwire.trace.ExceptionHandler;
 
 import android.app.Dialog;
 import android.app.IntentService;
@@ -108,6 +109,7 @@ public class ActivityRecognitionService extends IntentService implements Connect
          * connection failure listener, the constructor uses "this"
          * to specify the values of those parameters.
          */
+		//ExceptionHandler.register(this, "http://fyp.cheok.org/stacktrace/server.php");
         mActivityRecognitionClient =
                 new ActivityRecognitionClient(this, this, this);
         /*

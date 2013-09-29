@@ -19,6 +19,7 @@
     <uses-permission android:name="android.permission.PROCESS_OUTGOING_CALLS" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <application
         android:allowBackup="true"
@@ -36,7 +37,11 @@
         </activity>
 
         <receiver android:name="com.jiade.fyp.sensingclient.receivers.BootReceiver" >
-            <action android:name="android.intent.action.BOOT_COMPLETED" />
+            <intent-filter >
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            	<category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            
         </receiver>
 
         <service
