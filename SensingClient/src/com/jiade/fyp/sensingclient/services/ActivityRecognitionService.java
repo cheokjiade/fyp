@@ -28,9 +28,12 @@ import android.widget.Toast;
 
 public class ActivityRecognitionService extends IntentService implements ConnectionCallbacks, OnConnectionFailedListener{
 
+	public static int notMoving = 1;
 	private static SActivity tempActivity;
 	// Flag that indicates if a request is underway.
     private boolean mInProgress;
+    private int updateInterval;
+    static boolean still = false;
     
 	// Stores the PendingIntent used to send activity recognition events back to the app
     private PendingIntent mActivityRecognitionPendingIntent;
@@ -52,6 +55,10 @@ public class ActivityRecognitionService extends IntentService implements Connect
 	public void onConnected(Bundle arg0) {
 		Log.w("ActivityRecognitionService", "Connected");
 		mActivityRecognitionClient.requestActivityUpdates(4000, mActivityRecognitionPendingIntent);
+		updateInterval = 4000;
+		
+		//mInProgress = false;
+		//mActivityRecognitionClient.disconnect();
 		
 	}
 
@@ -77,6 +84,50 @@ public class ActivityRecognitionService extends IntentService implements Connect
 	             //Db4oHelper.getInstance(getApplicationContext()).db().store(loc);
 	             //Db4oHelper.getInstance(getApplicationContext()).db().close();
 	         }
+	         if(result.getMostProbableActivity().getType() == DetectedActivity.STILL && result.getMostProbableActivity().getConfidence()>70){
+	        	 notMoving++;
+	        	 still = true;
+	         }else {
+	        	 still = false;
+	        	 notMoving = 1;
+	         }
+	         if(!still){
+	 			
+					mActivityRecognitionClient.removeActivityUpdates(mActivityRecognitionPendingIntent);
+					mActivityRecognitionClient.requestActivityUpdates(4000, mActivityRecognitionPendingIntent);
+					Log.w("ActivityRecognitionService", "Updating Activity at 4 seconds");
+				
+
+				if(SensingService.ss!=null&&SensingService.ss.getUpdateInterval()!=15000){
+					SensingService.ss.setUpdateInterval(15000);
+					SensingService.ss.setInterval(15000);
+				}
+			}
+			 
+			if(notMoving>=8&&notMoving<15){
+	       	 //mActivityRecognitionClient.disconnect();
+	       	 mActivityRecognitionClient.removeActivityUpdates(mActivityRecognitionPendingIntent);
+		         mActivityRecognitionClient.requestActivityUpdates(8000, mActivityRecognitionPendingIntent);
+		         if(SensingService.ss!=null&&SensingService.ss.getUpdateInterval()!=30000){
+		        	 SensingService.ss.setInterval(30000);
+		        	 SensingService.ss.setUpdateInterval(30000);
+		         }
+	       		 
+		         updateInterval = 8000;
+		         Log.w("ActivityRecognitionService", "Updating Activity at 8 seconds");
+	        }else if(notMoving>=15){
+	       	 //mActivityRecognitionClient.disconnect();
+	       	 	mActivityRecognitionClient.removeActivityUpdates(mActivityRecognitionPendingIntent);
+		         mActivityRecognitionClient.requestActivityUpdates(15000, mActivityRecognitionPendingIntent);
+		         if(SensingService.ss!=null&&SensingService.ss.getUpdateInterval()!=600000){
+		        	 SensingService.ss.setInterval(600000);
+		        	 SensingService.ss.setUpdateInterval(600000);
+		         }
+	       		 
+		         updateInterval=15000;
+		         Log.w("ActivityRecognitionService", "Updating Activity at 15 seconds");
+	        }
+	         
 	         //Toast.makeText(getApplicationContext(), (result.getMostProbableActivity().getType()==DetectedActivity.STILL)?"Still":"Not Still", Toast.LENGTH_SHORT).show();
 	     }
 		

@@ -28,12 +28,16 @@ GooglePlayServicesClient.ConnectionCallbacks,
 GooglePlayServicesClient.OnConnectionFailedListener,
 LocationListener{
 	public static Location lastKnownLocation=null;
+	public static SensingService ss;
 	LocationClient mLocationClient;
 	LocationRequest mLocationRequest;
-	LocationDAO dao;
+	//LocationDAO dao;
+	private int updateInterval;
 	@Override
 	public void onCreate() {
+		updateInterval = 15000;
 		ExceptionHandler.register(this.getApplicationContext(), "http://fyp.cheok.org/stacktrace/server.php");
+		ss = this;
 		if(mLocationClient==null && isSupported()){
 			mLocationClient = new LocationClient(this, this, this);
 			mLocationClient.connect();
@@ -107,7 +111,9 @@ LocationListener{
         else
         	Db4oHelper.getInstance(getApplicationContext()).db().store(new Slocation(Double.toString(arg0.getLatitude()), Double.toString(arg0.getLongitude()), Double.toString(arg0.getAltitude()), arg0.getAccuracy(), new Date()));
         Db4oHelper.getInstance(getApplicationContext()).db().close();
-        //Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+        //if
+        Log.w("Location", Double.toString(arg0.getLatitude())+ " " + Double.toString(arg0.getLongitude()));
+        //Toast.makeText(this, Double.toString(arg0.getLatitude())+ " " + Double.toString(arg0.getLongitude()), Toast.LENGTH_SHORT).show();
 		
 	}
 
@@ -120,13 +126,13 @@ LocationListener{
 	@Override
 	public void onConnected(Bundle arg0) {
 		Toast.makeText(this, "Connected to location services.", Toast.LENGTH_SHORT).show();
-		dao = new LocationDAO(getApplicationContext());
-		mLocationRequest = LocationRequest.create();
-		mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-		mLocationRequest.setInterval(15000);
-        // Set the fastest update interval to 1 second
-        mLocationRequest.setFastestInterval(5000);
-		mLocationClient.requestLocationUpdates(mLocationRequest, this);
+//		dao = new LocationDAO(getApplicationContext());
+//		mLocationRequest = LocationRequest.create().setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY).setInterval(15000).setFastestInterval(5000);
+//		mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+//		mLocationRequest.setInterval(15000);
+//        // Set the fastest update interval to 1 second
+//        mLocationRequest.setFastestInterval(5000);
+		mLocationClient.requestLocationUpdates(LocationRequest.create().setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY).setInterval(15000).setFastestInterval(5000), this);
 		
 	}
 
@@ -134,5 +140,35 @@ LocationListener{
 	public void onDisconnected() {
 		mLocationClient.connect();
 		
+	}
+	
+	public void setInterval(int interval){
+		Log.w("LocationInterval", "Setting interval to " + Integer.toString(interval));
+		//mLocationRequest.setInterval(interval);
+		mLocationClient.removeLocationUpdates(this);
+		mLocationClient.requestLocationUpdates(LocationRequest.create().setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY).setInterval(interval).setFastestInterval(interval-5000), this);
+	}
+
+	/* (non-Javadoc)
+	 * @see android.app.Service#onDestroy()
+	 */
+	@Override
+	public void onDestroy() {
+		ss=null;
+		super.onDestroy();
+	}
+
+	/**
+	 * @return the updateInterval
+	 */
+	public int getUpdateInterval() {
+		return updateInterval;
+	}
+
+	/**
+	 * @param updateInterval the updateInterval to set
+	 */
+	public void setUpdateInterval(int updateInterval) {
+		this.updateInterval = updateInterval;
 	}
 }
