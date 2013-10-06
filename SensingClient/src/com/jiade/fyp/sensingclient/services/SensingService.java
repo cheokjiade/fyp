@@ -106,7 +106,11 @@ LocationListener{
         //Toast.makeText(this, "Size:" + Long.toString(dao.getRecords()), Toast.LENGTH_SHORT).show();
         //dao.close();
         if(ActivityRecognitionService.getTempActivity() != null){
-        	Db4oHelper.getInstance(getApplicationContext()).db().store(new Slocation(Double.toString(arg0.getLatitude()), Double.toString(arg0.getLongitude()), Double.toString(arg0.getAltitude()), arg0.getAccuracy(), new Date(), null, null, ActivityRecognitionService.getTempActivity()));
+        	try{
+        		Db4oHelper.getInstance(getApplicationContext()).db().store(new Slocation(Double.toString(arg0.getLatitude()), Double.toString(arg0.getLongitude()), Double.toString(arg0.getAltitude()), arg0.getAccuracy(), new Date(), null, null, ActivityRecognitionService.getTempActivity()));
+        	}catch(Exception e){
+        		e.printStackTrace();
+        	}
         }
         else
         	Db4oHelper.getInstance(getApplicationContext()).db().store(new Slocation(Double.toString(arg0.getLatitude()), Double.toString(arg0.getLongitude()), Double.toString(arg0.getAltitude()), arg0.getAccuracy(), new Date()));
@@ -127,12 +131,12 @@ LocationListener{
 	public void onConnected(Bundle arg0) {
 		Toast.makeText(this, "Connected to location services.", Toast.LENGTH_SHORT).show();
 //		dao = new LocationDAO(getApplicationContext());
-//		mLocationRequest = LocationRequest.create().setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY).setInterval(15000).setFastestInterval(5000);
-//		mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-//		mLocationRequest.setInterval(15000);
-//        // Set the fastest update interval to 1 second
-//        mLocationRequest.setFastestInterval(5000);
-		mLocationClient.requestLocationUpdates(LocationRequest.create().setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY).setInterval(15000).setFastestInterval(5000), this);
+		mLocationRequest = LocationRequest.create().setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY).setInterval(15000).setFastestInterval(5000);
+		mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+		mLocationRequest.setInterval(15000);
+        // Set the fastest update interval to 1 second
+        mLocationRequest.setFastestInterval(5000);
+		mLocationClient.requestLocationUpdates(mLocationRequest, this);
 		
 	}
 
@@ -144,9 +148,11 @@ LocationListener{
 	
 	public void setInterval(int interval){
 		Log.w("LocationInterval", "Setting interval to " + Integer.toString(interval));
-		//mLocationRequest.setInterval(interval);
+		mLocationRequest.setInterval(interval);
+		mLocationRequest.setFastestInterval(interval/2);//(interval);
 		mLocationClient.removeLocationUpdates(this);
-		mLocationClient.requestLocationUpdates(LocationRequest.create().setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY).setInterval(interval).setFastestInterval(interval-5000), this);
+		mLocationClient.requestLocationUpdates(mLocationRequest, this);
+		//mLocationClient.requestLocationUpdates(LocationRequest.create().setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY).setInterval(interval).setFastestInterval(interval-5000), this);
 	}
 
 	/* (non-Javadoc)
