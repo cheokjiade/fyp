@@ -38,6 +38,9 @@ public class ActivityRecognitionService extends IntentService implements Connect
     // Stores the current instantiation of the activity recognition client
     private ActivityRecognitionClient mActivityRecognitionClient;
     
+    private static int notMoving= 0;
+    private static boolean still=false;
+    
 	public ActivityRecognitionService() {
 		super("TestSensingActivityRecognition");
 	}
@@ -78,6 +81,29 @@ public class ActivityRecognitionService extends IntentService implements Connect
 	             //Db4oHelper.getInstance(getApplicationContext()).db().close();
 	         }
 	         //Toast.makeText(getApplicationContext(), (result.getMostProbableActivity().getType()==DetectedActivity.STILL)?"Still":"Not Still", Toast.LENGTH_SHORT).show();
+	         if(result.getMostProbableActivity().getType() == DetectedActivity.STILL && result.getMostProbableActivity().getConfidence()>70){
+	        	 notMoving++;
+	        	 still = true;
+	         }else {
+	        	 still = false;
+	        	 notMoving = 0;
+	        	 if(SensingService.ss!=null&&SensingService.ss.getUpdateInterval()!=15000){
+						//SensingService.ss.setUpdateInterval(15000);
+						//SensingService.ss.setInterval(15000);
+					}
+	         }
+	         
+	         if(notMoving>=8&&notMoving<40){
+	        	 if(SensingService.ss!=null&&SensingService.ss.getUpdateInterval()!=30000){
+		        	 //SensingService.ss.setInterval(30000);
+		        	 //SensingService.ss.setUpdateInterval(30000);
+		         }
+	         }else if(notMoving>=40){
+	        	 if(SensingService.ss!=null&&SensingService.ss.getUpdateInterval()!=600000){
+		        	 //SensingService.ss.setInterval(600000);
+		        	 //SensingService.ss.setUpdateInterval(600000);
+		         }
+	         }
 	     }
 		
 	}
