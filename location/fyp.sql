@@ -72,7 +72,10 @@ CREATE TABLE fyp.sms
   session_hash varchar(255) NOT NULL,
   location_time datetime NOT NULL,
   sms_number INT NOT NULL,
-  foreign key (session_hash, location_time) references phoneevents(session_hash, location_time)
+  sms_isadv INT NOT NULL,
+  sms_length INT NOT NULL,
+  sms_incomming INT NOT NULL,
+  foreign key (session_hash, location_time) references location(session_hash, location_time)
 );
 
 CREATE TABLE fyp.sim

@@ -38,6 +38,19 @@ ini_set('display_errors', 'On');
                 $query->bindParam(":humanactivity_probableactivityconfidence", $objActivity['activityProbableActivityConfidence']);
                 $query->execute();
             }
+            if(array_key_exists('objSMS',$item)){
+                $objSMS = $item['objSMS'];
+                $insert = "INSERT INTO sms(session_hash, location_time, sms_number, sms_isadv, sms_length, sms_incomming)
+                    VALUES (:session_hash, :location_time, :SMSNumber, :SMSisADV, :SMSlength, :SMSIO)";
+                $query = $conn->prepare($insert);
+                $query->bindParam(":session_hash", $sessionHash);
+                $query->bindParam(":location_time", date('Y-m-d H:i:s',strtotime($item['locationTimeStamp'])));
+                $query->bindParam(":SMSNumber", $objSMS['SMSNumber']);
+                $query->bindParam(":SMSisADV", $objSMS['SMSisADV']);
+                $query->bindParam(":SMSlength", $objSMS['SMSlength']);
+                $query->bindParam(":SMSIO", $objSMS['SMSIO']);
+                $query->execute();
+            }
         }catch (Exception $e){
             $query = $conn->prepare("SELECT * FROM location WHERE session_hash = :session_hash ORDER BY location_time DESC LIMIT 1");
             $query->bindParam(":session_hash", $sessionHash);

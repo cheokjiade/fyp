@@ -37,8 +37,9 @@ public class IncommingSMSReceiver extends BroadcastReceiver {
         for (Object pdu : pdus) {
             sms = SmsMessage.createFromPdu((byte[]) pdu);
             Location lastKnownLocation = SensingService.lastKnownLocation;
+            
             Slocation loc = new Slocation(Double.toString(lastKnownLocation.getLatitude()), Double.toString(lastKnownLocation.getLongitude()), Double.toString(lastKnownLocation.getAltitude()), lastKnownLocation.getAccuracy(), new Date());
-            loc.setObjSMS(new SSMS(SSMS.INCOMMING, sms.getOriginatingAddress()));
+            loc.setObjSMS(new SSMS(SSMS.INCOMMING, sms.getOriginatingAddress(),isADV(sms.getMessageBody()),sms.getMessageBody().length()));
             Db4oHelper.getInstance(context.getApplicationContext()).db().store(loc);
             Db4oHelper.getInstance(context.getApplicationContext()).db().close();
             Toast.makeText(context, "SMS Received and Stored", Toast.LENGTH_SHORT).show();
@@ -48,6 +49,11 @@ public class IncommingSMSReceiver extends BroadcastReceiver {
 //            Log.d("Test", "number of characters: " + sms.getMessageBody().length());
 //            Log.d("Test", "roaming: " + tm.isNetworkRoaming());
         }
+	}
+	
+	private int isADV(String msg){
+		if(msg.toLowerCase().startsWith("<adv>"))return 1;
+		else return 0;
 	}
 
 }
