@@ -53,7 +53,6 @@ public class MainActivity extends Activity {
 
 	@Override
 	protected void onResume() {
-		// TODO Auto-generated method stub
 		super.onResume();
 	}
 
@@ -134,36 +133,26 @@ public class MainActivity extends Activity {
 //		});
 //		sampleHandler.handleHTTP(null, "http://maps.googleapis.com/maps/api/directions/json?mode=walking&origin=1.339287%2C103.706383&destination=1.338215%2C103.697223&sensor=true");
 		if(!loadPreferences()){
-			bnRegister = (Button)findViewById(R.id.main_signup_bn);
+			//bnRegister = (Button)findViewById(R.id.main_signup_bn);
 			bnLogin = (Button)findViewById(R.id.main_login_bn);
 			
 			
-			bnRegister.setVisibility(View.VISIBLE);
+			//bnRegister.setVisibility(View.VISIBLE);
 			bnLogin.setVisibility(View.VISIBLE);
 			handler = new Handler();
-			bnRegister.setOnClickListener(new OnClickListener() {
-				
-				@Override
-				public void onClick(View v) {
-					handler.post(new Runnable() {
-						
-						@Override
-						public void run() {
-							//LocationDAO dao = new LocationDAO(getApplicationContext());
-							//dao.open();
-							//tvDetails.setText(LocationToJSONConverter.sensingLocationListToJSONString(dao.getAllSensingLocations()));
-							//dao.close();
-							Gson gson = new Gson();
-							tvDetails.setText(gson.toJson(arrayListLocation));
-							
-						}
-					});
-					
-				}
-			});
-			
+			if(bnRegister!=null){
+				bnRegister.setOnClickListener(new OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						handler.post(new Runnable() {
+							@Override
+							public void run() {
+							}
+						});
+					}
+				});
+			}
 			bnLogin.setOnClickListener(new OnClickListener() {
-				
 				@Override
 				public void onClick(View v) {
 					showLogin();
@@ -173,13 +162,35 @@ public class MainActivity extends Activity {
 			tvUsername.setText("Welcome " + userEmail);
 		}
 	}
+	private void showSignUp(){
+		dSignUp = new Dialog(this);
+		dSignUp.setContentView(R.layout.login_layout);
+		dSignUp.setTitle("Login");
+		dSignUp.setOnDismissListener(new OnDismissListener() {
+			@Override
+			public void onDismiss(DialogInterface dialog) {
+				dSignUp = null;
+			}
+		});
+		handler = new Handler();
+		httpHandler = new HTTPHandler();
+		final EditText etEmail = (EditText) dSignUp.findViewById(R.id.login_email_et);
+		final EditText etPassword = (EditText) dSignUp.findViewById(R.id.login_password_et);
+		final TextView tvMsg = (TextView)dSignUp.findViewById(R.id.login_msg_tv);
+		Button bnSubmit = (Button)dSignUp.findViewById(R.id.login_submit_bn);
+		bnSubmit.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				
+			};
+		});
+	}
 	
 	private void showLogin(){
 		dLogin = new Dialog(this);
 		dLogin.setContentView(R.layout.login_layout);
 		dLogin.setTitle("Login");
 		dLogin.setOnDismissListener(new OnDismissListener() {
-
 			@Override
 			public void onDismiss(DialogInterface dialog) {
 				dLogin = null;

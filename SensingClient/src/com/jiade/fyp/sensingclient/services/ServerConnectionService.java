@@ -121,6 +121,7 @@ public class ServerConnectionService extends Service {
 	}
 	
 	private void sendLocations(){
+		try{
 		if(prefs.getString(SensingSettings.SESSION_HASH, null)!=null){
 			SensingClientJSONContainer s = new SensingClientJSONContainer(new ArrayList<Slocation>(Db4oHelper.getInstance(getApplicationContext()).db().query(Slocation.class)), prefs.getString(SensingSettings.SESSION_HASH, null));
 			db.close();
@@ -128,6 +129,9 @@ public class ServerConnectionService extends Service {
 			List<NameValuePair> nameValuePairs = new ArrayList<NameValuePair>();
 			nameValuePairs.add(new BasicNameValuePair("location", gson.toJson(s)));
 			httpHandler.handleHTTP(nameValuePairs, SensingSettings.DOMAIN + "services/location.php");
+		}
+		}catch(Exception e){
+			e.printStackTrace();
 		}
 		
 	}
