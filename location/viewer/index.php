@@ -20,8 +20,18 @@ require_once('../db/conn.php');
         </script>
         <script src="/scripts/jquery-2.0.3.min.js" type="text/javascript"></script>
         <script type="text/javascript">
-            var path;
+            var path = new Array();
+            var colors=['#FF0000','#00FF00','#0000FF','#FFFF00','#FF00FF','#FFFFFF','#000000'];
             var map;
+            var pathCoordinates;
+            Array.prototype.clear = function()  //Add a new method to the Array Object
+            {
+                var i;
+                for(i=0;i<this.length;i++)
+                {
+                    this.pop();
+                }
+            }
             function initialize() {
                 var mapOptions = {
                     center: new google.maps.LatLng(1.3708097, 103.8529281),
@@ -31,28 +41,37 @@ require_once('../db/conn.php');
                 map = new google.maps.Map(document.getElementById("map-canvas"),
                     mapOptions);
 
-                var pathCoordinates = [
+                pathCoordinates = [
                     new google.maps.LatLng(37.772323, -122.214897),
                     new google.maps.LatLng(21.291982, -157.821856),
                     new google.maps.LatLng(-18.142599, 178.431),
                     new google.maps.LatLng(-27.46758, 153.027892)
                 ];
 
-                path = new google.maps.Polyline({
-                    path: pathCoordinates,
-                    strokeColor: '#FF0000',
-                    strokeOpacity: 1.0,
-                    strokeWeight: 2
-                });
+
             }
 
             function addLine(pathCoordinates) {
-                path.setPath(pathCoordinates);
-                path.setMap(map);
+                for(var i in pathCoordinates){
+                    var tmpPath= new google.maps.Polyline({
+                        path: pathCoordinates[i],
+                        map: map,
+                        strokeColor: colors[i],
+                        strokeOpacity: 1.0,
+                        strokeWeight: 2
+                    });
+                    //path[i].setPath(pathCoordinates[i]);
+                    //path[i].setMap(map);
+                    path.push(tmpPath);
+                }
             }
 
             function removeLine() {
-                path.setMap(null);
+                for(i=0;i<path.length;i++){
+                    path[i].setMap(null);
+                }
+                path.clear();
+
             }
 
             google.maps.event.addDomListener(window, 'load', initialize);
@@ -76,9 +95,13 @@ require_once('../db/conn.php');
             $(".dateSelector").click(function() {
                 //alert( $(this).text() +"Handler for .click() called." );
                 $.post("/services/viewer/viewByDate.php",{date:$(this).text()},function( data ) {
-                    var pathArray = [];
+                    var pathArray = new Array();
                     $.each(data, function(i, item){
-                        pathArray.push(new google.maps.LatLng(item.location_lat, item.location_lng));
+                        var tmpMid = item.mid;
+                        if(!(tmpMid in pathArray)){
+                            pathArray[tmpMid]=new Array();
+                        }
+                        pathArray[item.mid].push(new google.maps.LatLng(item.location_lat, item.location_lng));
                     });
                     removeLine();
                     addLine(pathArray);
