@@ -21,7 +21,7 @@ require_once('../db/conn.php');
         <script src="/scripts/jquery-2.0.3.min.js" type="text/javascript"></script>
         <script type="text/javascript">
             var path = new Array();
-            var colors=['#FF0000','#00FF00','#0000FF','#FFFF00','#FF00FF','#FFFFFF','#000000'];
+            var colors= new Array("#FF0055","#00FF00","#0000FF","#FFFF00","#FF00FF","#FFFFFF","#000000");
             var map;
             var pathCoordinates;
             Array.prototype.clear = function()  //Add a new method to the Array Object
@@ -52,11 +52,13 @@ require_once('../db/conn.php');
             }
 
             function addLine(pathCoordinates) {
+
+                var count = 0;
                 for(var i in pathCoordinates){
                     var tmpPath= new google.maps.Polyline({
                         path: pathCoordinates[i],
                         map: map,
-                        strokeColor: colors[i],
+                        strokeColor: colors[count++],
                         strokeOpacity: 1.0,
                         strokeWeight: 2
                     });
