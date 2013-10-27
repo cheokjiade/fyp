@@ -14,7 +14,32 @@ if($_REQUEST['date']){
     foreach ($query->fetchAll() as $row)  {
         $returnArray[]= array("location_lat"=>$row['location_lat'],"location_lng"=>$row['location_lng'],"location_height"=>$row['location_height'],"location_accuracy"=>$row['location_accuracy'],"location_time"=>$row['location_time'],"mid"=>$row['session_hash']);
     }
-    print json_encode($returnArray);
+    //Attempt to smooth out errors before returning
+    //maximum travel time per second should not be more than 45 meters/sec(144km/hr)
+    $maxDistPerSec = 45;
+    require_once('../../util/distance.php');
+    $smoothedArray = array();
+    $lastLat = 0;
+    $lastLng = 0;
+    $lastTime = 0;
+    $tempRowArray = array();
+    for($i=0, $size=count($returnArray);$i<$size;++$i){
+        if(array_key_exists($returnArray[$i]["mid"],$tempRowArray)){
+            $tempCurLocationRow = $returnArray[$i];
+            $tempPrevLocationRow = $tempRowArray[$returnArray[$i]["mid"]];
+            //if the distance between the 2 locations is less than timeinterval*40meters add it to the smoothed array
+            if(distance($tempPrevLocationRow['location_lat'],$tempPrevLocationRow['location_lng'],$tempCurLocationRow['location_lat'],$tempCurLocationRow['location_lng'])<$maxDistPerSec*(strtotime($tempCurLocationRow['location_time'])-strtotime($tempPrevLocationRow['location_time']))){
+                $smoothedArray[]= $returnArray[$i];
+                $tempRowArray[$returnArray[$i]["mid"]] = $returnArray[$i];
+            }
+        }else{
+            //if it is the fist location of a session, juist add it to the smoothed array
+            $smoothedArray[]= $returnArray[$i];
+            $tempRowArray[$returnArray[$i]["mid"]] = $returnArray[$i];
+        }
+        //$midArray[]$returnArray[$i][]
+    }
+    print json_encode($smoothedArray);
     //print_r($returnArray);
     $conn = null;
 }
