@@ -127,3 +127,13 @@ CREATE TABLE fyp.foregroundtask
   foreign key (activities_id) references  activities(activities_id)
 );
 
+CREATE TABLE fyp.point
+(
+  session_hash varchar(255) NOT NULL,
+  point_start_time datetime NOT NULL,
+  point_end_time datetime NOT NULL,
+  point_center_lat double NOT NULL,
+  point_center_lng double NOT NULL,
+  point_accuracy float,
+  foreign key (session_hash) references session(session_hash)
+);
