@@ -35,50 +35,58 @@ $currTmpPointLng = 0;
 for($i=0;$i<$size;++$i){
     $tempCurLocationRow = $returnArray[$i];
     $closenessCounter = 0;
-    if($i<4){
-        for($tempCounter = $i;$tempCounter<$i+8;$tempCounter++){
-            if(distance($returnArray[$tempCounter]['location_lat'],$returnArray[$tempCounter]['location_lng'],$tempCurLocationRow['location_lat'],$tempCurLocationRow['location_lng'])<$tempCurLocationRow['location_accuracy']+$returnArray[$tempCounter]['location_accuracy']){
+    if($i<5){
+        for($tempCounter = $i;$tempCounter<$i+12;$tempCounter++){
+            if(distance($returnArray[$tempCounter]['location_lat'],$returnArray[$tempCounter]['location_lng'],$tempCurLocationRow['location_lat'],$tempCurLocationRow['location_lng'])<($tempCurLocationRow['location_accuracy']+$returnArray[$tempCounter]['location_accuracy'])*1.3){
                 $closenessCounter++;
             }
         }
     }
-    elseif($size-$i<8){
-        for($tempCounter = $i-8;$tempCounter<$i;$tempCounter++){
-            if(distance($returnArray[$tempCounter]['location_lat'],$returnArray[$tempCounter]['location_lng'],$tempCurLocationRow['location_lat'],$tempCurLocationRow['location_lng'])<$tempCurLocationRow['location_accuracy']+$returnArray[$tempCounter]['location_accuracy']){
+    elseif($size-$i<12){
+        for($tempCounter = $i-12;$tempCounter<$i;$tempCounter++){
+            if(distance($returnArray[$tempCounter]['location_lat'],$returnArray[$tempCounter]['location_lng'],$tempCurLocationRow['location_lat'],$tempCurLocationRow['location_lng'])<($tempCurLocationRow['location_accuracy']+$returnArray[$tempCounter]['location_accuracy'])*1.3){
                 $closenessCounter++;
             }
         }
     }
     else{
-        for($tempCounter = $i-3;$tempCounter<$i+4;$tempCounter++){
-            if(distance($returnArray[$tempCounter]['location_lat'],$returnArray[$tempCounter]['location_lng'],$tempCurLocationRow['location_lat'],$tempCurLocationRow['location_lng'])<$tempCurLocationRow['location_accuracy']+$returnArray[$tempCounter]['location_accuracy']){
+        for($tempCounter = $i-5;$tempCounter<$i+6;$tempCounter++){
+            if(distance($returnArray[$tempCounter]['location_lat'],$returnArray[$tempCounter]['location_lng'],$tempCurLocationRow['location_lat'],$tempCurLocationRow['location_lng'])<($tempCurLocationRow['location_accuracy']+$returnArray[$tempCounter]['location_accuracy'])*1.3){
                 $closenessCounter++;
             }
         }
     }
-    if($closenessCounter>5){
+    if($closenessCounter>8){
         $tmpPoint[] = $tempCurLocationRow;
 
     }
     else{
         if(count($tmpPoint)>0){
-            if(count($tmpPoint)>8){
+            if(count($tmpPoint)>12){
                 $tmpPointSize = count($tmpPoint);
 
+                $totalAcc = 0;
                 $totalLat = 0;
                 $totalLng = 0;
 
+                $avgAcc = 0;
                 $avgLat = 0;
                 $avgLng = 0;
 
                 foreach($tmpPoint as $tmpRow){
                     $totalLat += $tmpRow['location_lat'];
                     $totalLng += $tmpRow['location_lng'];
+                    $totalAcc += $tmpRow['location_accuracy'];
                 }
 
                 $avgLat = $totalLat/$tmpPointSize;
                 $avgLng = $totalLng/$tmpPointSize;
-                $pointsArray[] = array("start_time"=>$tmpPoint[0]['location_time'],"end_time"=>$tmpPoint[$tmpPointSize-1]['location_time'],"point_center_lat"=>$avgLat,"point_center_lng"=>$avgLng);
+                $avgAcc = $totalAcc/$tmpPointSize;
+                //only register points under a certain accuracy
+                if($avgAcc<100){
+                    $pointsArray[] = array("start_time"=>$tmpPoint[0]['location_time'],"end_time"=>$tmpPoint[$tmpPointSize-1]['location_time'],"point_center_lat"=>$avgLat,"point_center_lng"=>$avgLng,"accuracy"=>$avgAcc);
+                }
+
             }
 
             $tmpPoint = array();
@@ -113,6 +121,7 @@ for($i=0;$i<$size;++$i){
                 <th>End Time</th>
                 <th>Lat</th>
                 <th>Lng</th>
+                <th>Accuracy</th>
             </tr>
             <?php
             foreach($pointsArray as $point){
@@ -122,6 +131,7 @@ for($i=0;$i<$size;++$i){
                 <td><?php echo $point["end_time"]?></td>
                 <td><?php echo $point["point_center_lat"]?></td>
                 <td><?php echo $point["point_center_lng"]?></td>
+                <td><?php echo $point["accuracy"]?></td>
             </tr>
             <?php
             }
@@ -131,17 +141,19 @@ for($i=0;$i<$size;++$i){
     <div id="map-canvas"/>
     <script>
         var locPoints = [];
+        var pointsAcc = [];
         <?php
             foreach($pointsArray as $point){
         ?>
         locPoints.push(new google.maps.LatLng(<?php echo $point["point_center_lat"]?>, <?php echo $point["point_center_lng"]?>));
+        pointsAcc.push(<?php echo $point["accuracy"]?>);
         <?php
         }
         ?>
         function initialize() {
             // Create the map.
             var mapOptions = {
-                zoom: 10,
+                zoom: 11,
                 center: new google.maps.LatLng(1.37081484, 103.85283565217),
                 mapTypeId: google.maps.MapTypeId.TERRAIN
             };
@@ -160,7 +172,7 @@ for($i=0;$i<$size;++$i){
                     fillOpacity: 0.25,
                     map: map,
                     center: locPoints[i],
-                    radius: 50//locPoints[locPoint].population / 20
+                    radius: pointsAcc[i]//locPoints[locPoint].population / 20
                 };
                 // Add the circle for this city to the map.
                 cityCircle = new google.maps.Circle(circleOptions);

@@ -99,11 +99,11 @@ require_once('../db/conn.php');
                 $.post("/services/viewer/viewByDate.php",{date:$(this).text()},function( data ) {
                     var pathArray = new Array();
                     $.each(data, function(i, item){
-                        var tmpMid = item.mid;
+                        var tmpMid = item.session_hash;
                         if(!(tmpMid in pathArray)){
                             pathArray[tmpMid]=new Array();
                         }
-                        pathArray[item.mid].push(new google.maps.LatLng(item.location_lat, item.location_lng));
+                        pathArray[item.session_hash].push(new google.maps.LatLng(item.location_lat, item.location_lng));
                     });
                     removeLine();
                     addLine(pathArray);
