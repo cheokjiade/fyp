@@ -11,11 +11,13 @@ ini_set('display_errors', 'On');
 require_once('../db/conn.php');
 $date = '2013-09-30';
 $dateStart = $date . " 00:00:00";
-$dateEnd = $date . " 23:59:59";
-$query = $conn->prepare("SELECT location_lat, location_lng,	location_height, location_accuracy, location_time, session_hash FROM location WHERE location_time BETWEEN :dateStart AND :dateEnd");
+$dateEnd = '2013-10-30' . " 23:59:59";
+$sessionHash = 'ff5d81d3b3c1034d3d722fbd3a037bab0e536887c4c122afc375502b1075fbac76e0c8e74dc1ede0b6e0ab9894153b62bc2c49a887d3f6c9982e09f3df801ce3';
+$query = $conn->prepare("SELECT location_lat, location_lng,	location_height, location_accuracy, location_time, session_hash FROM location WHERE location_time BETWEEN :dateStart AND :dateEnd AND session_hash = :sessionHash");
 
 $query->bindParam(":dateStart",$dateStart);
 $query->bindParam(":dateEnd",$dateEnd);
+$query->bindParam(":sessionHash",$sessionHash);
 $query->execute();
 $returnArray = array();
 foreach ($query->fetchAll() as $row)  {
@@ -23,6 +25,7 @@ foreach ($query->fetchAll() as $row)  {
 }
 
 require_once('../util/distance.php');
+require_once('../util/others.php');
 $size=count($returnArray);
 //To store latlng points that may be used to define a point
 $tmpPoint = array();
@@ -106,12 +109,12 @@ for($i=0;$i<$size;++$i){
         body { height: 100%; margin: 0; padding: 0 }
 
     </style>
-    <link rel="stylesheet/less" type="text/css" href="/styles/styles.less" />
-    <script src="/scripts/less-1.4.1.min.js" type="text/javascript"></script>
+    <link rel="stylesheet/less" type="text/css" href="../styles/styles.less" />
+    <script src="../scripts/less-1.4.1.min.js" type="text/javascript"></script>
     <script type="text/javascript"
             src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC5AN7Cbf3jecSlyOUHNNoCPE1ZJc6wGEw&sensor=true">
     </script>
-    <script src="/scripts/jquery-2.0.3.min.js" type="text/javascript"></script>
+    <script src="../scripts/jquery-2.0.3.min.js" type="text/javascript"></script>
 </head>
 <body>
     <div id="left">
@@ -122,8 +125,10 @@ for($i=0;$i<$size;++$i){
                 <th>Lat</th>
                 <th>Lng</th>
                 <th>Accuracy</th>
+                <th>Time Spent</th>
             </tr>
             <?php
+            $totalMinutes = "";
             foreach($pointsArray as $point){
             ?>
             <tr>
@@ -132,10 +137,15 @@ for($i=0;$i<$size;++$i){
                 <td><?php echo $point["point_center_lat"]?></td>
                 <td><?php echo $point["point_center_lng"]?></td>
                 <td><?php echo $point["accuracy"]?></td>
+                <td><?php
+                    $timeDiff = timeDifference($point["start_time"],$point["end_time"]);
+                    $totalMinutes+= $timeDiff;
+                    echo $timeDiff ?> minutes</td>
             </tr>
             <?php
             }
             ?>
+            <p><?php echo $totalMinutes . " minutes in a single location out of " . timeDifference($dateStart,$dateEnd) . " total minutes" ?></p>
         </table>
     </div>
     <div id="map-canvas"/>

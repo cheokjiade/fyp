@@ -13,12 +13,12 @@ require_once('../db/conn.php');
             body { height: 100%; margin: 0; padding: 0 }
 
         </style>
-        <link rel="stylesheet/less" type="text/css" href="/styles/styles.less" />
-        <script src="/scripts/less-1.4.1.min.js" type="text/javascript"></script>
+        <link rel="stylesheet/less" type="text/css" href="../styles/styles.less" />
+        <script src="../scripts/less-1.4.1.min.js" type="text/javascript"></script>
         <script type="text/javascript"
                 src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC5AN7Cbf3jecSlyOUHNNoCPE1ZJc6wGEw&sensor=true">
         </script>
-        <script src="/scripts/jquery-2.0.3.min.js" type="text/javascript"></script>
+        <script src="../scripts/jquery-2.0.3.min.js" type="text/javascript"></script>
         <script type="text/javascript">
             var path = new Array();
             var colors= new Array("#FF0055","#00FF00","#0000FF","#FFFF00","#FF00FF","#FFFFFF","#000000");
@@ -83,11 +83,11 @@ require_once('../db/conn.php');
         <div id="left">
             <ul>
                 <?php
-                $sql = "SELECT DISTINCT CAST(`location_time` AS DATE ) AS uniqueDate FROM location;";
+                $sql = "SELECT DISTINCT CAST(`location_time` AS DATE ) AS uniqueDate FROM location ORDER BY uniqueDate;";
                 foreach ($conn->query($sql) as $row) {
                 ?>
                 <li class="dateSelector"><?php echo $row['uniqueDate']?></li>
-                <?
+                <?php
                 }
                 ?>
             </ul>
@@ -96,7 +96,7 @@ require_once('../db/conn.php');
     <script>
             $(".dateSelector").click(function() {
                 //alert( $(this).text() +"Handler for .click() called." );
-                $.post("/services/viewer/viewByDate.php",{date:$(this).text()},function( data ) {
+                $.post("../services/viewer/viewByDate.php",{date:$(this).text()},function( data ) {
                     var pathArray = new Array();
                     $.each(data, function(i, item){
                         var tmpMid = item.session_hash;
