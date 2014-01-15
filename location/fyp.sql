@@ -6,7 +6,7 @@ CREATE TABLE fyp.userdata
   userdata_hash varchar(255) UNIQUE, -- The hash will be auto generated as required, not currently in use
   userdata_phonenumber varchar(255),
   primary key (userdata_id)
-);
+)ENGINE = MyISAM;
 
 CREATE TABLE fyp.device
 (
@@ -16,7 +16,7 @@ CREATE TABLE fyp.device
   device_details text,
   primary key (userdata_id, device_id),
   foreign key (userdata_id) references userdata(userdata_id)
-);
+)ENGINE = MyISAM;
 
 CREATE TABLE fyp.session
 (
@@ -25,7 +25,7 @@ CREATE TABLE fyp.session
   device_id varchar(255) NOT NULL,
   session_timestamp DATETIME NOT NULL,
   foreign key (userdata_id, device_id) references device(userdata_id, device_id)
-);
+)ENGINE = MyISAM;
 
 CREATE TABLE fyp.location
 (
@@ -37,7 +37,7 @@ CREATE TABLE fyp.location
   location_time datetime NOT NULL,
   primary key (session_hash, location_time),
   foreign key (session_hash) references session(session_hash)
-);
+)ENGINE = MyISAM;
 
 CREATE TABLE fyp.humanactivity
 (
@@ -47,7 +47,7 @@ CREATE TABLE fyp.humanactivity
   humanactivity_probableactivityconfidence int NOT NULL,
   foreign key (session_hash) references session(session_hash),
   primary key (session_hash, location_time)
-);
+)ENGINE = MyISAM;
 
 --CREATE TABLE fyp.phoneevents
 --(
@@ -65,7 +65,7 @@ CREATE TABLE fyp.call
   call_number varchar(25) NOT NULL,
   call_duration bigint NOT NULL,
   foreign key (session_hash, location_time) references phoneevents(session_hash, location_time)
-);
+)ENGINE = MyISAM;
 
 CREATE TABLE fyp.sms
 (
@@ -76,7 +76,7 @@ CREATE TABLE fyp.sms
   sms_length INT NOT NULL,
   sms_incomming INT NOT NULL,
   foreign key (session_hash, location_time) references location(session_hash, location_time)
-);
+)ENGINE = MyISAM;
 
 CREATE TABLE fyp.sim
 (
@@ -85,7 +85,7 @@ CREATE TABLE fyp.sim
   sim_number varchar(255) NOT NULL,
   sim_operator varchar(255) NOT NULL,
   foreign key (session_hash, location_time) references phoneevents(session_hash, location_time)
-);
+)ENGINE = MyISAM;
 
 CREATE TABLE fyp.network
 (
@@ -93,21 +93,21 @@ CREATE TABLE fyp.network
   location_time datetime NOT NULL,
   network_operator varchar(255) NOT NULL,
   foreign key (session_hash, location_time) references phoneevents(session_hash, location_time)
-);
+)ENGINE = MyISAM;
 
 CREATE TABLE fyp.wifissid
 (
   wifissid_id bigint NOT NULL AUTO_INCREMENT,
   wifissid_name varchar(255) NOT NULL UNIQUE,
   primary key (wifissid_id)
-);
+)ENGINE = MyISAM;
 
 CREATE TABLE fyp.activities
 (
   activities_id bigint NOT NULL AUTO_INCREMENT,
   activities_name varchar(255) NOT NULL UNIQUE,
   primary key (activities_id)
-);
+)ENGINE = MyISAM;
 
 CREATE TABLE fyp.detectedwifi
 (
@@ -116,7 +116,7 @@ CREATE TABLE fyp.detectedwifi
   wifissid_id bigint NOT NULL,
   foreign key (session_hash, location_time) references phoneevents(session_hash, location_time),
   foreign key (wifissid_id) references  wifissid(wifissid_id)
-);
+)ENGINE = MyISAM;
 
 CREATE TABLE fyp.foregroundtask
 (
@@ -125,15 +125,29 @@ CREATE TABLE fyp.foregroundtask
   activities_id bigint NOT NULL,
   foreign key (session_hash, location_time) references phoneevents(session_hash, location_time),
   foreign key (activities_id) references  activities(activities_id)
-);
+)ENGINE = MyISAM;
 
-CREATE TABLE fyp.point
+CREATE TABLE fyp.locationpoint
 (
+  locationpoint_id BIGINT NOT NULL AUTO_INCREMENT,
+  locationpoint_center_lat double NOT NULL,
+  locationpoint_center_lng double NOT NULL,
+  locationpoint_accuracy float NOT NULL DEFAULT 50,
+  primary key(locationpoint_id)
+)ENGINE = MyISAM;
+
+CREATE TABLE fyp.stoppoint
+(
+  stoppoint_id BIGINT NOT NULL AUTO_INCREMENT,
   session_hash varchar(255) NOT NULL,
-  point_start_time datetime NOT NULL,
-  point_end_time datetime NOT NULL,
-  point_center_lat double NOT NULL,
-  point_center_lng double NOT NULL,
-  point_accuracy float,
-  foreign key (session_hash) references session(session_hash)
-);
+  locationpoint_id BIGINT NOT NULL,
+  stoppoint_start_time datetime NOT NULL,
+  stoppoint_end_time datetime NOT NULL,
+  stoppoint_center_lat double NOT NULL,
+  stoppoint_center_lng double NOT NULL,
+  stoppoint_accuracy float NOT NULL DEFAULT 50,
+  foreign key (session_hash) references `session`(session_hash),
+  foreign key (locationpoint_id) references locationpoint(locationpoint_id),
+  primary key (stoppoint_id)
+)ENGINE = MyISAM;
+
