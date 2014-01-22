@@ -71,6 +71,8 @@
         </receiver>
         
         <service android:name=".services.ServerConnectionService"></service>
+        <receiver android:name=".receivers.ScreenReceiver"></receiver>
+        <service android:name=".services.SaveToDBService" android:enabled="true"></service>
     </application>
 
 </manifest>

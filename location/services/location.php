@@ -51,6 +51,17 @@ ini_set('display_errors', 'On');
                 $query->bindParam(":SMSIO", $objSMS['SMSIO']);
                 $query->execute();
             }
+            if(array_key_exists('objAction',$item)){
+                $objAction = $item['objAction'];
+                $insert = "INSERT INTO phoneaction(session_hash, location_time, phoneaction_source, phoneaction_action)
+                    VALUES (:session_hash, :location_time, :actionSource, :actionAction)";
+                $query = $conn->prepare($insert);
+                $query->bindParam(":session_hash", $sessionHash);
+                $query->bindParam(":location_time", date('Y-m-d H:i:s',strtotime($item['locationTimeStamp'])));
+                $query->bindParam(":actionSource", $objSMS['actionSource']);
+                $query->bindParam(":actionAction", $objSMS['actionAction']);
+                $query->execute();
+            }
         }catch (Exception $e){
             $query = $conn->prepare("SELECT * FROM location WHERE session_hash = :session_hash ORDER BY location_time DESC LIMIT 1");
             $query->bindParam(":session_hash", $sessionHash);

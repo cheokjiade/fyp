@@ -12,6 +12,7 @@ public class Slocation {
 	private SSMS objSMS;
 	private SCall objCall;
 	private SActivity objActivity;
+	private SAction objAction;
 	
 	
 	public Slocation(String locationLat, String locationLng,
@@ -36,6 +37,32 @@ public class Slocation {
 		this.locationAlt = locationAlt;
 		this.locationAcc = locationAcc;
 		this.locationTimeStamp = locationTimeStamp;
+	}
+	
+	/**
+	 * @param locationLat
+	 * @param locationLng
+	 * @param locationAlt
+	 * @param locationAcc
+	 * @param locationTimeStamp
+	 * @param objSMS
+	 * @param objCall
+	 * @param objActivity
+	 * @param objAction
+	 */
+	public Slocation(String locationLat, String locationLng,
+			String locationAlt, float locationAcc, Date locationTimeStamp,
+			SSMS objSMS, SCall objCall, SActivity objActivity, SAction objAction) {
+		super();
+		this.locationLat = locationLat;
+		this.locationLng = locationLng;
+		this.locationAlt = locationAlt;
+		this.locationAcc = locationAcc;
+		this.locationTimeStamp = locationTimeStamp;
+		this.objSMS = objSMS;
+		this.objCall = objCall;
+		this.objActivity = objActivity;
+		this.objAction = objAction;
 	}
 	
 	public String getLocationLat() {
@@ -97,6 +124,20 @@ public class Slocation {
 
 	public void setObjActivity(SActivity objActivity) {
 		this.objActivity = objActivity;
+	}
+
+	/**
+	 * @return the objAction
+	 */
+	public SAction getObjAction() {
+		return objAction;
+	}
+
+	/**
+	 * @param objAction the objAction to set
+	 */
+	public void setObjAction(SAction objAction) {
+		this.objAction = objAction;
 	}
 	
 	

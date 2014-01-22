@@ -18,6 +18,7 @@ import com.jiade.fyp.sensingclient.entities.SensingClientJSONContainer;
 import com.jiade.fyp.sensingclient.entities.Slocation;
 import com.jiade.fyp.sensingclient.json.LocationToJSONConverter;
 import com.jiade.fyp.sensingclient.services.ActivityRecognitionService;
+import com.jiade.fyp.sensingclient.services.SaveToDBService;
 import com.jiade.fyp.sensingclient.services.SensingService;
 import com.jiade.fyp.sensingclient.services.ServerConnectionService;
 import com.jiade.fyp.sensingclient.settings.SensingSettings;
@@ -111,6 +112,8 @@ public class MainActivity extends Activity {
 		this.startService(startActivityRecognitionIntent);
 		Intent startServerConnectionIntent = new Intent(this,ServerConnectionService.class);
 		this.startService(startServerConnectionIntent);
+		Intent saveToDBIntent = new Intent(this,SaveToDBService.class);
+		this.startService(saveToDBIntent);
 		tvDetails = (TextView)findViewById(R.id.main_detailedinfo_tv);
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
 			tvDetails.setTextIsSelectable(true);

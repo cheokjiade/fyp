@@ -8,6 +8,7 @@ import java.util.Date;
 import com.jiade.fyp.sensingclient.db.Db4oHelper;
 import com.jiade.fyp.sensingclient.entities.SSMS;
 import com.jiade.fyp.sensingclient.entities.Slocation;
+import com.jiade.fyp.sensingclient.services.SaveToDBService;
 import com.jiade.fyp.sensingclient.services.SensingService;
 
 import android.content.BroadcastReceiver;
@@ -36,13 +37,13 @@ public class IncommingSMSReceiver extends BroadcastReceiver {
  
         for (Object pdu : pdus) {
             sms = SmsMessage.createFromPdu((byte[]) pdu);
-            Location lastKnownLocation = SensingService.lastKnownLocation;
-            
-            Slocation loc = new Slocation(Double.toString(lastKnownLocation.getLatitude()), Double.toString(lastKnownLocation.getLongitude()), Double.toString(lastKnownLocation.getAltitude()), lastKnownLocation.getAccuracy(), new Date());
-            loc.setObjSMS(new SSMS(SSMS.INCOMMING, sms.getOriginatingAddress(),isADV(sms.getMessageBody()),sms.getMessageBody().length()));
-            Db4oHelper.getInstance(context.getApplicationContext()).db().store(loc);
-            Db4oHelper.getInstance(context.getApplicationContext()).db().close();
-            Toast.makeText(context, "SMS Received and Stored", Toast.LENGTH_SHORT).show();
+            Intent i = new Intent(context, SaveToDBService.class);
+            i.putExtra("actionType", SaveToDBService.SMS_RECEIVED);
+            i.putExtra("ORIGINATING_ADDRESS", sms.getOriginatingAddress());
+            i.putExtra("IS_ADV", isADV(sms.getMessageBody()));
+            i.putExtra("MSG_LENGTH", sms.getMessageBody().length());
+            context.startService(i);
+            //Toast.makeText(context, "SMS Received and Stored", Toast.LENGTH_SHORT).show();
             Log.w("IncommingSMSReceiver", "SMS Stored");
 //            Log.d("Test", "originating number: " + sms.getOriginatingAddress());
 //            Log.d("Test", "time received: " + System.currentTimeMillis());
@@ -52,7 +53,7 @@ public class IncommingSMSReceiver extends BroadcastReceiver {
 	}
 	
 	private int isADV(String msg){
-		if(msg.toLowerCase().startsWith("<adv>"))return 1;
+		if(msg.toLowerCase().startsWith("<adv>")||msg.toLowerCase().startsWith("adv"))return 1;
 		else return 0;
 	}
 

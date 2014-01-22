@@ -151,3 +151,11 @@ CREATE TABLE fyp.stoppoint
   primary key (stoppoint_id)
 )ENGINE = MyISAM;
 
+CREATE TABLE fyp.phoneaction
+(
+  session_hash varchar(255) NOT NULL,
+  location_time datetime NOT NULL,
+  phoneaction_source INT NOT NULL,
+  phoneaction_action INT NOT NULL,
+  foreign key (session_hash, location_time) references location(session_hash, location_time)
+)ENGINE = MyISAM;

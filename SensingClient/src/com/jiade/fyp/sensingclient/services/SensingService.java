@@ -10,13 +10,17 @@ import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.jiade.fyp.sensingclient.db.Db4oHelper;
 import com.jiade.fyp.sensingclient.db.LocationDAO;
+import com.jiade.fyp.sensingclient.entities.SAction;
 import com.jiade.fyp.sensingclient.entities.SensingLocation;
 import com.jiade.fyp.sensingclient.entities.Slocation;
 import com.nullwire.trace.ExceptionHandler;
 
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.text.format.Time;
@@ -107,7 +111,7 @@ LocationListener{
         //dao.close();
         if(ActivityRecognitionService.getTempActivity() != null){
         	try{
-        		Db4oHelper.getInstance(getApplicationContext()).db().store(new Slocation(Double.toString(arg0.getLatitude()), Double.toString(arg0.getLongitude()), Double.toString(arg0.getAltitude()), arg0.getAccuracy(), new Date(), null, null, ActivityRecognitionService.getTempActivity()));
+        		Db4oHelper.getInstance(getApplicationContext()).db().store(new Slocation(Double.toString(arg0.getLatitude()), Double.toString(arg0.getLongitude()), Double.toString(arg0.getAltitude()), arg0.getAccuracy(), new Date(), null, null, ActivityRecognitionService.getTempActivity(),new SAction(SAction.DATA_CONNECTION, haveNetworkConnection())));
         	}catch(Exception e){
         		e.printStackTrace();
         	}
@@ -176,5 +180,24 @@ LocationListener{
 	 */
 	public void setUpdateInterval(int updateInterval) {
 		this.updateInterval = updateInterval;
+	}
+	
+	private int haveNetworkConnection() {
+	    boolean haveConnectedWifi = false;
+	    boolean haveConnectedMobile = false;
+	    ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+	    NetworkInfo[] netInfo = cm.getAllNetworkInfo();
+	    for (NetworkInfo ni : netInfo) {
+	        if (ni.getTypeName().equalsIgnoreCase("WIFI"))
+	            if (ni.isConnected())
+	                haveConnectedWifi = true;
+	        if (ni.getTypeName().equalsIgnoreCase("MOBILE"))
+	            if (ni.isConnected())
+	                haveConnectedMobile = true;
+	    }
+	    if(haveConnectedWifi&&haveConnectedMobile)return 3;
+	    if( haveConnectedWifi) return 2;
+	    if (haveConnectedMobile)return 1;
+	    else return 0;
 	}
 }
