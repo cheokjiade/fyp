@@ -71,7 +71,7 @@ CREATE TABLE fyp.sms
 (
   session_hash varchar(255) NOT NULL,
   location_time datetime NOT NULL,
-  sms_number INT NOT NULL,
+  sms_number varchar(255) NOT NULL,
   sms_isadv INT NOT NULL,
   sms_length INT NOT NULL,
   sms_incomming INT NOT NULL,

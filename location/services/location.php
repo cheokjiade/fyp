@@ -58,8 +58,8 @@ ini_set('display_errors', 'On');
                 $query = $conn->prepare($insert);
                 $query->bindParam(":session_hash", $sessionHash);
                 $query->bindParam(":location_time", date('Y-m-d H:i:s',strtotime($item['locationTimeStamp'])));
-                $query->bindParam(":actionSource", $objSMS['actionSource']);
-                $query->bindParam(":actionAction", $objSMS['actionAction']);
+                $query->bindParam(":actionSource", $objAction['actionSource']);
+                $query->bindParam(":actionAction", $objAction['actionAction']);
                 $query->execute();
             }
         }catch (Exception $e){

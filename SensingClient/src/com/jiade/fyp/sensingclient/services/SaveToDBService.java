@@ -19,18 +19,17 @@ import android.os.IBinder;
 
 public class SaveToDBService extends IntentService {
 
+	
 	public static final int SCREEN_ON_OFF = 1, SMS_RECEIVED = 3;
 	public static final int TURNING_ON = 0, TURNING_OFF = 1;
-	public SaveToDBService(String name) {
-		super(name);
-		// TODO Auto-generated constructor stub
+	public SaveToDBService() {
+		super("SaveToDBService");
 	}
 
 	private ObjectContainer db;
 	
 	@Override
 	public IBinder onBind(Intent arg0) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -42,10 +41,8 @@ public class SaveToDBService extends IntentService {
 		// TODO Auto-generated method stub
 		super.onCreate();
 		db = Db4oHelper.getInstance(getApplicationContext()).db();
-		IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_ON);
-        filter.addAction(Intent.ACTION_SCREEN_OFF);
-        BroadcastReceiver mReceiver = new ScreenReceiver();
-        registerReceiver(mReceiver, filter);
+		
+		
 	}
 
 	@Override

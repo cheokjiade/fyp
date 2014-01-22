@@ -24,5 +24,6 @@ public class ScreenReceiver extends BroadcastReceiver {
         i.putExtra("screen_state", state);
         context.startService(i);
 	}
+	
 
 }

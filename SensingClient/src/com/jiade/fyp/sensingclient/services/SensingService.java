@@ -13,11 +13,14 @@ import com.jiade.fyp.sensingclient.db.LocationDAO;
 import com.jiade.fyp.sensingclient.entities.SAction;
 import com.jiade.fyp.sensingclient.entities.SensingLocation;
 import com.jiade.fyp.sensingclient.entities.Slocation;
+import com.jiade.fyp.sensingclient.receivers.ScreenReceiver;
 import com.nullwire.trace.ExceptionHandler;
 
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.location.Location;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -37,6 +40,7 @@ LocationListener{
 	LocationRequest mLocationRequest;
 	//LocationDAO dao;
 	private int updateInterval;
+	public static boolean screenReceiverIsActive = false;
 	@Override
 	public void onCreate() {
 		updateInterval = 15000;
@@ -46,6 +50,12 @@ LocationListener{
 			mLocationClient = new LocationClient(this, this, this);
 			mLocationClient.connect();
 			
+		}
+		if(!screenReceiverIsActive){
+			IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_ON);
+	        filter.addAction(Intent.ACTION_SCREEN_OFF);
+	        BroadcastReceiver mReceiver = new ScreenReceiver();
+	        registerReceiver(mReceiver, filter);
 		}
 		//super.onCreate();
 		
