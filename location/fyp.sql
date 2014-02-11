@@ -173,7 +173,12 @@ CREATE TABLE fyp.publictransportstops
 CREATE TABLE fyp.publictransportservices
 (
   publictransportservices_id varchar(50) NOT NULL UNIQUE,
-)
+  publictransportservices_description varchar(255),
+  publictransportservices_operator varchar(255),
+  publictransportservices_type varchar(255),
+  publictransportservices_num_routes INT,
+  primary key (publictransportservices_id)
+)ENGINE = MyISAM;
 
 CREATE TABLE fyp.publictransportstopservices
 (
