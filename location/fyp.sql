@@ -159,3 +159,61 @@ CREATE TABLE fyp.phoneaction
   phoneaction_action INT NOT NULL,
   foreign key (session_hash, location_time) references location(session_hash, location_time)
 )ENGINE = MyISAM;
+
+CREATE TABLE fyp.publictransportstops
+(
+  publictransportstops_id varchar(50) NOT NULL UNIQUE,
+  publictransportstops_lat double NOT NULL,
+  publictransportstops_lng double NOT NULL,
+  publictransportstops_description varchar(255),
+  publictransportstops_radius double NOT NULL DEFAULT 10,
+  primary key (publictransportstops_id)
+)ENGINE = MyISAM;
+
+CREATE TABLE fyp.publictransportservices
+(
+  publictransportservices_id varchar(50) NOT NULL UNIQUE,
+)
+
+CREATE TABLE fyp.publictransportstopservices
+(
+  publictransportstops_id varchar(50) NOT NULL,
+  publictransportservices_id varchar(50) NOT NULL,
+  foreign key(publictransportstops_id) references publictransportstops(publictransportstops_id),
+  foreign key(publictransportservices_id) references publictransportservices(publictransportservices_id)
+)ENGINE = MyISAM;
+
+
+DELIMITER //
+
+DROP FUNCTION IF EXISTS DISTANCE; //
+
+CREATE FUNCTION DISTANCE( lat1 DOUBLE, lon1 DOUBLE, lat2 DOUBLE, lon2 DOUBLE )
+    RETURNS DOUBLE NO SQL DETERMINISTIC
+    COMMENT 'counts distance (km) between 2 points on Earth surface'
+BEGIN
+    DECLARE dtor DOUBLE DEFAULT 57.295800;
+
+    RETURN (6371 * acos(sin( lat1/dtor) * sin(lat2/dtor) +
+        cos(lat1/dtor) * cos(lat2/dtor) *
+        cos(lon2/dtor - lon1/dtor)));
+END; //
+
+DELIMITER ;
+
+/*
+  select aswkt(point(location_lng, location_lat))  from location;
+DELIMITER $$
+CREATE FUNCTION `distance`
+(a POINT, b POINT)
+RETURNS double DETERMINISTIC
+BEGIN
+RETURN round(glength(linestringfromwkb(linestring(asbinary(a),asbinary(b)))));
+END $$
+DELIMITER ;
+
+SELECT location_lat, location_lng, glength(linestringfromwkb(linestring(point('103.8529281','1.3708097'),point(location_lng, location_lat))))  as sdistance
+from location having sdistance < 5
+
+SELECT * from location where location_lat = 0 or location_lng = 0
+*/
