@@ -9,6 +9,8 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 'On');
 require_once('../db/conn.php');
+require_once('../util/others.php');
+
 $date = '2013-09-30';
 $dateStart = $date . " 00:00:00";
 $dateEnd = '2013-10-05' . " 23:59:59";
@@ -24,123 +26,11 @@ $returnArray = $query->fetchAll(PDO::FETCH_ASSOC);//array();
 //    $returnArray[]= array("location_lat"=>$row['location_lat'],"location_lng"=>$row['location_lng'],"location_height"=>$row['location_height'],"location_accuracy"=>$row['location_accuracy'],"location_time"=>$row['location_time'],"mid"=>$row['session_hash']);
 //}
 
-require_once('../util/distance.php');
-require_once('../util/others.php');
-
-
-
-function smoothPoints($returnArray){
-    $maxDistPerSec = 30;
-    $smoothedArray = array();
-    $lastLat = 0;
-    $lastLng = 0;
-    $lastTime = 0;
-    $tempRowArray = array();
-    $spikePointsArray = array();
-    for($i=0, $size=count($returnArray);$i<$size;++$i){
-        if(array_key_exists($returnArray[$i]["session_hash"],$tempRowArray)){
-            $tempCurLocationRow = $returnArray[$i];
-            $tempPrevLocationRow = $tempRowArray[$returnArray[$i]["session_hash"]];
-            //if the distance between the 2 locations is less than timeinterval*40meters add it to the smoothed array
-            if(distance($tempPrevLocationRow['location_lat'],$tempPrevLocationRow['location_lng'],$tempCurLocationRow['location_lat'],$tempCurLocationRow['location_lng'])<$maxDistPerSec*(strtotime($tempCurLocationRow['location_time'])-strtotime($tempPrevLocationRow['location_time']))){
-                if(array_key_exists($returnArray[$i]["session_hash"],$spikePointsArray)){
-                    //This checks if the gps keeps defaulting to a single spiked point. If not it will be added
-                    if($spikePointsArray[$returnArray[$i]["session_hash"]]['location_lng']!= $returnArray[$i]['location_lng'] && $spikePointsArray[$returnArray[$i]["session_hash"]]['location_lat']!= $returnArray[$i]['location_lat']){
-                        $smoothedArray[]= $returnArray[$i];
-                        $tempRowArray[$returnArray[$i]["session_hash"]] = $returnArray[$i];
-                    }
-                }else{
-                    $smoothedArray[]= $returnArray[$i];
-                    $tempRowArray[$returnArray[$i]["session_hash"]] = $returnArray[$i];
-                }
-
-            }else{ //add the location to an array of last spikes so we can remove the spike if it occurs int he same location
-                $spikePointsArray[$returnArray[$i]["session_hash"]] = $returnArray[$i];
-            }
-        }else{
-            //if it is the fist location of a session, juist add it to the smoothed array
-            $smoothedArray[]= $returnArray[$i];
-            $tempRowArray[$returnArray[$i]["session_hash"]] = $returnArray[$i];
-        }
-        //$midArray[]$returnArray[$i][]
-    }
-    return $smoothedArray;
-}
-
-
+//smooth the array
 $smoothedArray = smoothPoints($returnArray);
-$size=count($smoothedArray);
-//To store latlng points that may be used to define a point
-$tmpPoint = array();
-//To store the points
-$pointsArray = array();
-
-$currTmpPointLat = 0;
-$currTmpPointLng = 0;
-
-for($i=0;$i<$size;++$i){
-    $tempCurLocationRow = $smoothedArray[$i];
-    $closenessCounter = 0;
-    if($i<5){
-        for($tempCounter = $i;$tempCounter<$i+12;$tempCounter++){
-            if(distance($smoothedArray[$tempCounter]['location_lat'],$smoothedArray[$tempCounter]['location_lng'],$tempCurLocationRow['location_lat'],$tempCurLocationRow['location_lng'])<($tempCurLocationRow['location_accuracy']+$smoothedArray[$tempCounter]['location_accuracy'])*1.3){
-                $closenessCounter++;
-            }
-        }
-    }
-    elseif($size-$i<12){
-        for($tempCounter = $i-12;$tempCounter<$i;$tempCounter++){
-            if(distance($smoothedArray[$tempCounter]['location_lat'],$smoothedArray[$tempCounter]['location_lng'],$tempCurLocationRow['location_lat'],$tempCurLocationRow['location_lng'])<($tempCurLocationRow['location_accuracy']+$smoothedArray[$tempCounter]['location_accuracy'])*1.3){
-                $closenessCounter++;
-            }
-        }
-    }
-    else{
-        for($tempCounter = $i-5;$tempCounter<$i+6;$tempCounter++){
-            if(distance($smoothedArray[$tempCounter]['location_lat'],$smoothedArray[$tempCounter]['location_lng'],$tempCurLocationRow['location_lat'],$tempCurLocationRow['location_lng'])<($tempCurLocationRow['location_accuracy']+$smoothedArray[$tempCounter]['location_accuracy'])*1.3){
-                $closenessCounter++;
-            }
-        }
-    }
-    if($closenessCounter>8){
-        $tmpPoint[] = $tempCurLocationRow;
-
-    }
-    else{
-        if(count($tmpPoint)>0){
-            if(count($tmpPoint)>12){
-                $tmpPointSize = count($tmpPoint);
-
-                $totalAcc = 0;
-                $totalLat = 0;
-                $totalLng = 0;
-
-                $avgAcc = 0;
-                $avgLat = 0;
-                $avgLng = 0;
-
-                foreach($tmpPoint as $tmpRow){
-                    $totalLat += $tmpRow['location_lat'];
-                    $totalLng += $tmpRow['location_lng'];
-                    $totalAcc += $tmpRow['location_accuracy'];
-                }
-
-                $avgLat = $totalLat/$tmpPointSize;
-                $avgLng = $totalLng/$tmpPointSize;
-                $avgAcc = $totalAcc/$tmpPointSize;
-                //only register points under a certain accuracy
-                if($avgAcc<100){
-                    $pointsArray[] = array("start_time"=>$tmpPoint[0]['location_time'],"end_time"=>$tmpPoint[$tmpPointSize-1]['location_time'],"point_center_lat"=>$avgLat,"point_center_lng"=>$avgLng,"accuracy"=>$avgAcc);
-                }
-
-            }
-
-            $tmpPoint = array();
-        }
-
-    }
-
-}
+//then add them into a points array
+$pointsArray = mergePoints(retrievePointsFromLocations($smoothedArray));
+//$pointsArray = retrievePointsFromLocations($smoothedArray);
 
 $numPoints = count($pointsArray);
 $pathArray = array();

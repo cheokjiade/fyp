@@ -130,6 +130,8 @@ CREATE TABLE fyp.foregroundtask
 CREATE TABLE fyp.locationpoint
 (
   locationpoint_id BIGINT NOT NULL AUTO_INCREMENT,
+  locationpoint_description VARCHAR(255),
+  locationpoint_type VARCHAR(255),
   locationpoint_center_lat double NOT NULL,
   locationpoint_center_lng double NOT NULL,
   locationpoint_accuracy float NOT NULL DEFAULT 50,
