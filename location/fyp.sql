@@ -190,6 +190,27 @@ CREATE TABLE fyp.publictransportstopservices
   foreign key(publictransportservices_id) references publictransportservices(publictransportservices_id)
 )ENGINE = MyISAM;
 
+CREATE TABLE fyp.route
+(
+  route_id BIGINT NOT NULL AUTO_INCREMENT,
+  session_hash varchar(255) NOT NULL,
+  locationpoint_id_start BIGINT NOT NULL,
+  locationpoint_id_end BIGINT NOT NULL,
+  foreign key (session_hash) references session(session_hash),
+  foreign key(locationpoint_id_start) references locationpoint(locationpoint_id),
+  foreign key(locationpoint_id_start) references locationpoint(locationpoint_id),
+  primary key (route_id)
+)ENGINE = MyISAM;
+
+CREATE TABLE fyp.routepoint
+(
+  route_id BIGINT NOT NULL,
+  session_hash varchar(255) NOT NULL,
+  location_time datetime NOT NULL,
+  foreign key (session_hash, location_time) references location(session_hash, location_time),
+  foreign key (route_id) references route(route_id)
+)ENGINE = MyISAM;
+
 
 DELIMITER //
 

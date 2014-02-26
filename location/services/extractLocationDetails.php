@@ -48,7 +48,7 @@ if($result['Count'] == 0){
         $pointsArray = mergePoints($basicPointsArray);
         foreach($pointsArray as $point){
             echo "p";
-            $query = $conn->prepare("SELECT *, distance(:lat1,:lng1,locationpoint_center_lat,locationpoint_center_lng) AS distance FROM locationpoint HAVING distance <0.035 ORDER BY distance;");
+            $query = $conn->prepare("SELECT *, distance(:lat1,:lng1,locationpoint_center_lat,locationpoint_center_lng) AS distance FROM locationpoint HAVING distance <0.05 ORDER BY distance;");
             $query->bindParam(":lat1", $point["point_center_lat"]);        //point_center_lat
             $query->bindParam(":lng1", $point["point_center_lng"]);
            // $query->bindParam(":session_hash", $sessionHash["session_hash"]);
@@ -128,7 +128,7 @@ if($result['Count'] == 0){
         $pointsArray = mergePoints($basicPointsArray);
         foreach($pointsArray as $point){
             echo "p";
-            $query = $conn->prepare("SELECT *, distance(:lat1,:lng1,locationpoint_center_lat,locationpoint_center_lng) AS distance FROM locationpoint HAVING distance <0.0350 ORDER BY distance;");
+            $query = $conn->prepare("SELECT *, distance(:lat1,:lng1,locationpoint_center_lat,locationpoint_center_lng) AS distance FROM locationpoint HAVING distance <0.05 ORDER BY distance;");
             $query->bindParam(":lat1", $point["point_center_lat"]);        //point_center_lat
             $query->bindParam(":lng1", $point["point_center_lng"]);
             // $query->bindParam(":session_hash", $sessionHash["session_hash"]);
