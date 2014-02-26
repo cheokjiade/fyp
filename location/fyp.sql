@@ -194,11 +194,11 @@ CREATE TABLE fyp.route
 (
   route_id BIGINT NOT NULL AUTO_INCREMENT,
   session_hash varchar(255) NOT NULL,
-  locationpoint_id_start BIGINT NOT NULL,
-  locationpoint_id_end BIGINT NOT NULL,
+  stoppoint_id_start BIGINT NOT NULL,
+  stoppoint_id_end BIGINT NOT NULL,
   foreign key (session_hash) references session(session_hash),
-  foreign key(locationpoint_id_start) references locationpoint(locationpoint_id),
-  foreign key(locationpoint_id_start) references locationpoint(locationpoint_id),
+  foreign key(stoppoint_id_start) references stoppoint(stoppoint_id),
+  foreign key(stoppoint_id_start) references stoppoint(stoppoint_id),
   primary key (route_id)
 )ENGINE = MyISAM;
 

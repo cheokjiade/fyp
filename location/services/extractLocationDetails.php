@@ -107,6 +107,9 @@ if($result['Count'] == 0){
             $query = $conn->prepare("DELETE FROM stoppoint WHERE stoppoint_id = :stoppoint_id;");
             $query->bindParam(":stoppoint_id", $result[0]["stoppoint_id"]);
             $query->execute();
+            $query = $conn->prepare("DELETE route, routepoint FROM route INNER JOIN routepoint WHERE route.route_id = routepoint.route_id  AND route.stoppoint_id_end = :stoppoint_id;");
+            $query->bindParam(":stoppoint_id", $result[0]["stoppoint_id"]);
+            $query->execute();
             $stoppoint_start_time = $result[0]["stoppoint_start_time"];
         }
         $query = $conn->prepare("SELECT location_lat, location_lng,	location_height, location_accuracy, location_time, session_hash FROM location WHERE location_time BETWEEN :startDate AND :udate + INTERVAL 2 MONTH AND session_hash = :session_hash ORDER BY location_time;");
@@ -160,5 +163,61 @@ if($result['Count'] == 0){
             // $query->bindParam(":session_hash", $sessionHash["session_hash"]);
             $query->execute();
         }
+    }
+}
+$query = $conn->prepare("SELECT DISTINCT session_hash FROM location;");
+$query->execute();
+foreach($query->fetchAll(PDO::FETCH_ASSOC) as $sessionHash){
+    set_time_limit(100);
+    $query = $conn->prepare("SELECT r.*, sp.stoppoint_end_time FROM route r, stoppoint sp WHERE r.session_hash = :session_hash AND r.stoppoint_id_end = sp.stoppoint_id ORDER BY sp.stoppoint_end_time DESC LIMIT 1;");
+    $query->bindParam(":session_hash", $sessionHash["session_hash"]);
+    $query->execute();
+    $result = $query->fetchAll(PDO::FETCH_ASSOC);
+    if(count($result)>0){
+        $query = $conn->prepare("SELECT * FROM stoppoint WHERE stoppoint_end_time >= :last_route_end_time AND session_hash = :session_hash;");
+        $query->bindParam(":last_route_end_time", $result[0]["stoppoint_end_time"]);
+        $query->bindParam(":session_hash", $sessionHash["session_hash"]);
+        $query->execute();
+        $tempLocation = null;
+        $result = $query->fetchAll(PDO::FETCH_ASSOC);
+
+    }
+    else{
+        $query = $conn->prepare("SELECT * FROM stoppoint WHERE session_hash = :session_hash;");
+        $query->bindParam(":session_hash", $sessionHash["session_hash"]);
+        $query->execute();
+        $tempLocation = null;
+        $result = $query->fetchAll(PDO::FETCH_ASSOC);
+    }
+    foreach($result as $stopPoint){
+        set_time_limit(100);
+        if(is_null($tempLocation)){
+            $tempLocation = $stopPoint;
+            continue;
+        }
+        $query = $conn->prepare("INSERT INTO route(session_hash, stoppoint_id_start, stoppoint_id_end)
+                    VALUES(:session_hash, :stoppoint_id_start, :stoppoint_id_end);");
+        $query->bindParam(":session_hash", $sessionHash["session_hash"]);
+        $query->bindParam(":stoppoint_id_start", $tempLocation["stoppoint_id"]);
+        $query->bindParam(":stoppoint_id_end", $stopPoint["stoppoint_id"]);
+        $query->execute();
+        $lastInsertID = $conn->lastInsertId();
+        echo 'G';
+
+        $query = $conn->prepare("SELECT * FROM location WHERE location_time BETWEEN :dateStart AND :dateEnd AND session_hash = :sessionHash ORDER BY location_time");
+        $query->bindParam(":dateStart",$tempLocation["stoppoint_end_time"]);
+        $query->bindParam(":dateEnd",$stopPoint["stoppoint_start_time"]);
+        $query->bindParam(":sessionHash",$sessionHash["session_hash"]);
+        $query->execute();
+        $path = smoothPoints($query->fetchAll(PDO::FETCH_ASSOC));
+        foreach($path as $pathPoint){
+            $query = $conn->prepare("INSERT INTO routepoint(route_id, session_hash, location_time)
+                    VALUES(:route_id, :session_hash, :location_time);");
+            $query->bindParam(":route_id", $lastInsertID);
+            $query->bindParam(":session_hash", $sessionHash["session_hash"]);
+            $query->bindParam(":location_time", $pathPoint["location_time"]);
+            $query->execute();
+        }
+        $tempLocation = $stopPoint;
     }
 }
