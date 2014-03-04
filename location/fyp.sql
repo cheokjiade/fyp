@@ -211,7 +211,19 @@ CREATE TABLE fyp.routepoint
   foreign key (route_id) references route(route_id)
 )ENGINE = MyISAM;
 
-
+CREATE TABLE fyp.locationvariantprob
+(
+  locationvariantprob_id BIGINT NOT NULL AUTO_INCREMENT,
+  session_hash varchar(255) NOT NULL,
+  locationpoint_from_id BIGINT NOT NULL,
+  locationpoint_to_id BIGINT NOT NULL,
+  locationvariantprob_count BIGINT NOT NULL DEFAULT 1,
+  foreign key (session_hash) references session(session_hash),
+  foreign key (locationpoint_from_id) references locationpoint(locationpoint_id),
+  foreign key (locationpoint_to_id) references locationpoint(locationpoint_id),
+  primary key (locationvariantprob_id),
+  unique key (session_hash,locationpoint_from_id,locationpoint_to_id)
+)ENGINE = MyISAM;
 DELIMITER //
 
 DROP FUNCTION IF EXISTS DISTANCE; //

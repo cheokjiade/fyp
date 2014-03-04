@@ -129,6 +129,7 @@ if($result['Count'] == 0){
         $basicPointsArray = retrievePointsFromLocations($smoothedArray);
         //then add them into a points array
         $pointsArray = mergePoints($basicPointsArray);
+        //inserting the points
         foreach($pointsArray as $point){
             echo "p";
             $query = $conn->prepare("SELECT *, distance(:lat1,:lng1,locationpoint_center_lat,locationpoint_center_lng) AS distance FROM locationpoint HAVING distance <0.05 ORDER BY distance;");
@@ -195,6 +196,7 @@ foreach($query->fetchAll(PDO::FETCH_ASSOC) as $sessionHash){
             $tempLocation = $stopPoint;
             continue;
         }
+        //insert route
         $query = $conn->prepare("INSERT INTO route(session_hash, stoppoint_id_start, stoppoint_id_end)
                     VALUES(:session_hash, :stoppoint_id_start, :stoppoint_id_end);");
         $query->bindParam(":session_hash", $sessionHash["session_hash"]);
@@ -204,6 +206,15 @@ foreach($query->fetchAll(PDO::FETCH_ASSOC) as $sessionHash){
         $lastInsertID = $conn->lastInsertId();
         echo 'G';
 
+        //fill the location variant probability table
+        $query = $conn->prepare("INSERT INTO locationvariantprob(session_hash, locationpoint_from_id, locationpoint_to_id)
+                    VALUES(:session_hash, :locationpoint_from_id, :locationpoint_to_id) ON DUPLICATE KEY UPDATE locationvariantprob_count = locationvariantprob_count +1 ;");
+        $query->bindParam(":session_hash", $sessionHash["session_hash"]);
+        $query->bindParam(":locationpoint_from_id", $tempLocation["locationpoint_id"]);
+        $query->bindParam(":locationpoint_to_id", $stopPoint["locationpoint_id"]);
+        $query->execute();
+
+        //insert route details
         $query = $conn->prepare("SELECT * FROM location WHERE location_time BETWEEN :dateStart AND :dateEnd AND session_hash = :sessionHash ORDER BY location_time");
         $query->bindParam(":dateStart",$tempLocation["stoppoint_end_time"]);
         $query->bindParam(":dateEnd",$stopPoint["stoppoint_start_time"]);
