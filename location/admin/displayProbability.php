@@ -99,12 +99,14 @@ foreach($rawPointsArray as $point){
 </div>
 <div id="map-canvas"/>
 <script>
+    var sessionHash = '<?php echo $sessionHash;?>';
     var pointsArray = <?php echo json_encode($pointsArray);?>;
     var pointsIDArray = <?php echo json_encode($pointsIDArray);?>;
-    var colors= new Array("#FF0055","#00FF00","#0000FF","#FFFF00","#FF00FF","#FFFFFF","#000000");
+    var colors= new Array("#3ADF00","#4B8A08","#868A08","#8A4B08","#B43104","#B40404","#3B0B0B");
     var locPoints = [];
     var pointsAcc = [];
     var pathArray = [];
+    var paths = [];
     var circleArray = [];
     var nextPoints = [];
     // Create the map.
@@ -162,7 +164,56 @@ foreach($rawPointsArray as $point){
             showNextDestinations(map,circle,pointID);
             infoWindow.setPosition(circle.getCenter());
             infoWindow.open(map);
+            showRoutesToDestinations(pointID);
         });
+    }
+
+    function showRoutesToDestinations(pointID){
+        for(var i=0;i<paths.length;i++){
+            paths[i].setMap(null);
+        }
+        paths.clear();
+        $.post(
+            "../services/viewer/viewRoutesByStartLocation.php",
+            {sessionHash: sessionHash, startLocation: pointID},
+            function(data){
+                $.each(data,function(i,path){
+                    $.each(path,function(j,point){
+                        if(j>0){
+                            var tempPathCoordinates =[];
+                            tempPathCoordinates.push(new google.maps.LatLng(path[j-1].location_lat,path[j-1].location_lng));
+                            tempPathCoordinates.push(new google.maps.LatLng(point.location_lat,point.location_lng));
+                            var tempPath = new google.maps.Polyline({
+                                path: tempPathCoordinates,
+                                geodesic: true,
+                                strokeColor: speedToColor(point.speed),
+                                strokeOpacity: 0.5,
+                                strokeWeight: 1,
+                                map: map
+                            });
+                            paths.push(tempPath);
+                        }
+                    });
+                });
+            },
+            "json"
+        );
+    }
+
+    function speedToColor(speed){
+        if(speed < 1){
+            return colors[0];
+        }if(speed < 2){
+            return colors[1];
+        }if(speed < 4){
+            return colors[2];
+        }if(speed < 10){
+            return colors[3];
+        }if(speed < 20){
+            return colors[4];
+        }if(speed < 30){
+            return colors[5];
+        }return colors[6];
     }
 
     function showNextDestinations(map,circle,pointID){
@@ -171,8 +222,6 @@ foreach($rawPointsArray as $point){
             nextPoints[i].setMap(null);
         }
         nextPoints.clear();
-
-
         for(var i=0;i< pointsArray[pointID]["destinationList"].length;i++){
             var circleOptions = {
                 strokeColor: '#00FF00',
