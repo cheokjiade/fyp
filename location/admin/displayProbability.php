@@ -125,6 +125,8 @@ foreach($rawPointsArray as $point){
         mapOptions);
     map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(
         document.getElementById('speed-legend'));
+    var geocoder =new google.maps.Geocoder();
+
     Array.prototype.clear = function()  //Add a new method to the Array Object
     {
         var i;
@@ -250,13 +252,28 @@ foreach($rawPointsArray as $point){
             // Add the circle for this city to the map.
             var cityCircle = new google.maps.Circle(circleOptions);
             nextPoints.push(cityCircle);
+            var infoWindowText = "";
+            geocoder.geocode({'latLng': cityCircle.getCenter()}, function(results, status) {
+                if (status == google.maps.GeocoderStatus.OK) {
+                    if (results[1]) {
+                        //document.getElementById("info-window-"+i).innerHTML = results[1].formatted_address;
+                        infoWindowText = results[1].formatted_address;
+                    } else {
+                        alert('No results found');
+                    }
+                } else {
+                    alert('Geocoder failed due to: ' + status);
+                }
+            });
             var infoWindow = new google.maps.InfoWindow({
-                content: "<div>"+(parseFloat(pointsArray[pointID]["destinationList"][i]["count"])/parseFloat(pointsArray[pointID]["totalCount"])*100).toFixed(2)+"%</div>",
+                content: "<div>"+(parseFloat(pointsArray[pointID]["destinationList"][i]["count"])/parseFloat(pointsArray[pointID]["totalCount"])*100).toFixed(2)+"%<br><div id=\"info-window-"+ i +"\"></div></div>",
                 maxWidth: 500,
                 position: cityCircle.getCenter()
             });
             infoWindow.open(map);
             nextInfoWindows.push(infoWindow);
+
+
         }
     }
 
