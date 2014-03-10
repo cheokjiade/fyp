@@ -98,6 +98,9 @@ foreach($rawPointsArray as $point){
     </table>
 </div>
 <div id="map-canvas"/>
+<div id="speed-legend">
+    test
+</div>
 <script>
     var sessionHash = '<?php echo $sessionHash;?>';
     var pointsArray = <?php echo json_encode($pointsArray);?>;
@@ -109,6 +112,8 @@ foreach($rawPointsArray as $point){
     var paths = [];
     var circleArray = [];
     var nextPoints = [];
+    var infoWindows = [];
+    var nextInfoWindows = [];
     // Create the map.
     var mapOptions = {
         zoom: 13,
@@ -118,6 +123,8 @@ foreach($rawPointsArray as $point){
 
     var map = new google.maps.Map(document.getElementById('map-canvas'),
         mapOptions);
+    map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(
+        document.getElementById('speed-legend'));
     Array.prototype.clear = function()  //Add a new method to the Array Object
     {
         var i;
@@ -161,11 +168,15 @@ foreach($rawPointsArray as $point){
             maxWidth: 500
         });
         google.maps.event.addListener(circle, 'click', function(ev){
+            for(var i=0;i<infoWindows.length;i++){
+                infoWindows[i].close();
+            }
             showNextDestinations(map,circle,pointID);
             infoWindow.setPosition(circle.getCenter());
             infoWindow.open(map);
             showRoutesToDestinations(pointID);
         });
+        infoWindows.push(infoWindow);
     }
 
     function showRoutesToDestinations(pointID){
@@ -187,8 +198,8 @@ foreach($rawPointsArray as $point){
                                 path: tempPathCoordinates,
                                 geodesic: true,
                                 strokeColor: speedToColor(point.speed),
-                                strokeOpacity: 0.5,
-                                strokeWeight: 1,
+                                strokeOpacity: 0.9,
+                                strokeWeight: 5,
                                 map: map
                             });
                             paths.push(tempPath);
@@ -220,8 +231,10 @@ foreach($rawPointsArray as $point){
         //empty the array and remove previous circles
         for(var i=0;i<nextPoints.length;i++){
             nextPoints[i].setMap(null);
+            nextInfoWindows[i].close();
         }
         nextPoints.clear();
+        nextInfoWindows.clear();
         for(var i=0;i< pointsArray[pointID]["destinationList"].length;i++){
             var circleOptions = {
                 strokeColor: '#00FF00',
@@ -237,6 +250,13 @@ foreach($rawPointsArray as $point){
             // Add the circle for this city to the map.
             var cityCircle = new google.maps.Circle(circleOptions);
             nextPoints.push(cityCircle);
+            var infoWindow = new google.maps.InfoWindow({
+                content: "<div>"+(parseFloat(pointsArray[pointID]["destinationList"][i]["count"])/parseFloat(pointsArray[pointID]["totalCount"])*100).toFixed(2)+"%</div>",
+                maxWidth: 500,
+                position: cityCircle.getCenter()
+            });
+            infoWindow.open(map);
+            nextInfoWindows.push(infoWindow);
         }
     }
 
@@ -245,6 +265,7 @@ foreach($rawPointsArray as $point){
 
     }
     google.maps.event.addDomListener(window, 'load', initialize);
+
 </script>
 </body>
 </html>
