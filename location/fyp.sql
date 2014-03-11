@@ -224,8 +224,24 @@ CREATE TABLE fyp.locationvariantprob
   primary key (locationvariantprob_id),
   unique key (session_hash,locationpoint_from_id,locationpoint_to_id)
 )ENGINE = MyISAM;
-DELIMITER //
 
+CREATE TABLE fyp.locationtag
+(
+  locationtag_id BIGINT NOT NULL AUTO_INCREMENT,
+  locationtag_text varchar(255) NOT NULL UNIQUE,
+  primary key (locationtag_id)
+)ENGINE = MyISAM;
+
+CREATE TABLE fyp.locationandtags
+(
+  locationtag_id BIGINT NOT NULL,
+  locationpoint_id BIGINT NOT NULL,
+  foreign key (locationtag_id) references locationtag(locationtag_id),
+  foreign key (locationpoint_id) references locationpoint(locationpoint_id),
+  primary key (locationtag_id,locationpoint_id)
+)ENGINE = MyISAM;
+
+DELIMITER //
 DROP FUNCTION IF EXISTS DISTANCE; //
 
 CREATE FUNCTION DISTANCE( lat1 DOUBLE, lon1 DOUBLE, lat2 DOUBLE, lon2 DOUBLE )

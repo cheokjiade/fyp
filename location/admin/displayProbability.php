@@ -28,7 +28,9 @@ $sessionHash = $sessionHashes[0]["session_hash"];
 $query = $conn->prepare("SELECT
 	lvp.*,
 	lp1.locationpoint_center_lat AS 'locationpoint_from_lat', lp1.locationpoint_center_lng AS 'locationpoint_from_lng' ,
-	lp2.locationpoint_center_lat AS 'locationpoint_to_lat', lp2.locationpoint_center_lng AS 'locationpoint_to_lng'
+	lp1.locationpoint_description AS 'locationpoint_from_description',
+	lp2.locationpoint_center_lat AS 'locationpoint_to_lat', lp2.locationpoint_center_lng AS 'locationpoint_to_lng',
+	lp2.locationpoint_description AS 'locationpoint_to_description'
 FROM
 	locationvariantprob lvp, locationpoint lp1, locationpoint lp2
 WHERE
@@ -48,12 +50,12 @@ foreach($rawPointsArray as $point){
         //add the counts up
         $pointsArray[$point['locationpoint_from_id']]['totalCount'] = $pointsArray[$point['locationpoint_from_id']]['totalCount'] + $point['locationvariantprob_count'];
         //insert destination into the list
-        $pointsArray[$point['locationpoint_from_id']]['destinationList'][] = array('id'=>$point['locationpoint_to_id'],'lat'=>$point['locationpoint_to_lat'],'lng'=>$point['locationpoint_to_lng'],'count'=>$point['locationvariantprob_count']);
+        $pointsArray[$point['locationpoint_from_id']]['destinationList'][] = array('id'=>$point['locationpoint_to_id'],'lat'=>$point['locationpoint_to_lat'],'lng'=>$point['locationpoint_to_lng'], 'description'=>$point["locationpoint_to_description"], 'count'=>$point['locationvariantprob_count']);
     }
     else{
         $pointsIDArray[] = $point['locationpoint_from_id'];
-        $pointsArray[$point['locationpoint_from_id']] = array('pointID'=>$point['locationpoint_from_id'],'lat'=>$point['locationpoint_from_lat'],'lng'=>$point['locationpoint_from_lng'],'totalCount'=>$point['locationvariantprob_count'],'destinationList'=>array());
-        $pointsArray[$point['locationpoint_from_id']]['destinationList'][] = array('id'=>$point['locationpoint_to_id'],'lat'=>$point['locationpoint_to_lat'],'lng'=>$point['locationpoint_to_lng'],'count'=>$point['locationvariantprob_count']);
+        $pointsArray[$point['locationpoint_from_id']] = array('pointID'=>$point['locationpoint_from_id'],'lat'=>$point['locationpoint_from_lat'],'lng'=>$point['locationpoint_from_lng'], 'description'=>$point["locationpoint_from_description"], 'totalCount'=>$point['locationvariantprob_count'],'destinationList'=>array());
+        $pointsArray[$point['locationpoint_from_id']]['destinationList'][] = array('id'=>$point['locationpoint_to_id'],'lat'=>$point['locationpoint_to_lat'],'lng'=>$point['locationpoint_to_lng'], 'description'=>$point["locationpoint_to_description"], 'count'=>$point['locationvariantprob_count']);
     }
 }
 //print_r($pointsArray);
@@ -78,7 +80,7 @@ foreach($rawPointsArray as $point){
 </head>
 <body>
 <div id="left">
-    <table>
+    <!--<table>
         <tr>
             <th>Lat</th>
             <th>Lng</th>
@@ -95,7 +97,7 @@ foreach($rawPointsArray as $point){
         <?php
         }
         ?>
-    </table>
+    </table>-->
 </div>
 <div id="map-canvas"/>
 <div id="speed-legend">
@@ -252,7 +254,7 @@ foreach($rawPointsArray as $point){
             // Add the circle for this city to the map.
             var cityCircle = new google.maps.Circle(circleOptions);
             nextPoints.push(cityCircle);
-            var infoWindowText = "";
+            /*var infoWindowText = "";
             geocoder.geocode({'latLng': cityCircle.getCenter()}, function(results, status) {
                 if (status == google.maps.GeocoderStatus.OK) {
                     if (results[1]) {
@@ -264,10 +266,10 @@ foreach($rawPointsArray as $point){
                 } else {
                     alert('Geocoder failed due to: ' + status);
                 }
-            });
+            }); */
             var infoWindow = new google.maps.InfoWindow({
-                content: "<div>"+(parseFloat(pointsArray[pointID]["destinationList"][i]["count"])/parseFloat(pointsArray[pointID]["totalCount"])*100).toFixed(2)+"%<br><div id=\"info-window-"+ i +"\"></div></div>",
-                maxWidth: 500,
+                content: "<div>"+(parseFloat(pointsArray[pointID]["destinationList"][i]["count"])/parseFloat(pointsArray[pointID]["totalCount"])*100).toFixed(2)+"%<br><div id=\"info-window-"+ i +"\">"+pointsArray[pointID]["destinationList"][i]["description"]+"</div></div>",
+                maxWidth: 700,
                 position: cityCircle.getCenter()
             });
             infoWindow.open(map);
