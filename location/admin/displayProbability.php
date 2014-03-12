@@ -99,10 +99,29 @@ foreach($rawPointsArray as $point){
         ?>
     </table>-->
 </div>
-<div id="map-canvas"/>
-<div id="speed-legend">
+<div id="speedlegend" class="hidden">
     test
 </div>
+<div id="testlegend" class="hidden">
+    <ul class="legend-holder">
+        <li class="legend-item">
+            <div class="input-color">
+                <!--<input type="text" value="Orange" />--><div class="legend-text">test</div>
+                <div class="color-box" style="background-color: #FF850A;"></div>
+                <!-- Replace "#FF850A" to change the color -->
+            </div>
+        </li><!--
+        --><li class="legend-item">
+            <div class="input-color">
+                <div class="legend-text">test</div>
+                <div class="color-box" style="background-color: navy;"></div>
+                <!-- Replace "navy" to change the color -->
+            </div>
+        </li>
+    </ul>
+</div>
+<div id="map-canvas"/>
+
 <script>
     var sessionHash = '<?php echo $sessionHash;?>';
     var pointsArray = <?php echo json_encode($pointsArray);?>;
@@ -125,8 +144,7 @@ foreach($rawPointsArray as $point){
 
     var map = new google.maps.Map(document.getElementById('map-canvas'),
         mapOptions);
-    map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(
-        document.getElementById('speed-legend'));
+    //map.controls[google.maps.ControlPosition.BOTTOM_RIGHT].push(document.getElementById('speedlegend'));
     var geocoder =new google.maps.Geocoder();
 
     Array.prototype.clear = function()  //Add a new method to the Array Object
@@ -139,7 +157,14 @@ foreach($rawPointsArray as $point){
     }
     //alert(pointsArray[pointsIDArray[4]]["lat"]);
     function initialize() {
+        document.getElementById('testlegend').index = 1;
+        map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(document.getElementById('testlegend'));
 
+        /*var homeControlDiv = document.createElement('div');
+        var homeControl = new SpeedLegend(homeControlDiv, map);
+
+        homeControlDiv.index = 1;
+        map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(homeControlDiv);*/
         /*var infoWindow = new google.maps.InfoWindow({
             content: "hi",
             maxWidth: 500
@@ -165,7 +190,7 @@ foreach($rawPointsArray as $point){
 
         }
     }
-
+    //adds the onclick events to each circle that is a start point
     function clickClickableCircle(map, circle, pointID){
         var infoWindow = new google.maps.InfoWindow({
             content: "<div>"+pointID+"</div>",
@@ -182,8 +207,9 @@ foreach($rawPointsArray as $point){
         });
         infoWindows.push(infoWindow);
     }
-
+    //shows the routes to destinations from a point given its id
     function showRoutesToDestinations(pointID){
+        document.getElementById('testlegend').style.display = "inline";
         for(var i=0;i<paths.length;i++){
             paths[i].setMap(null);
         }
@@ -268,7 +294,7 @@ foreach($rawPointsArray as $point){
                 }
             }); */
             var infoWindow = new google.maps.InfoWindow({
-                content: "<div>"+(parseFloat(pointsArray[pointID]["destinationList"][i]["count"])/parseFloat(pointsArray[pointID]["totalCount"])*100).toFixed(2)+"%<br><div id=\"info-window-"+ i +"\">"+pointsArray[pointID]["destinationList"][i]["description"]+"</div></div>",
+                content: "<div class=\"infowindow\">"+(parseFloat(pointsArray[pointID]["destinationList"][i]["count"])/parseFloat(pointsArray[pointID]["totalCount"])*100).toFixed(2)+"%<br><div id=\"info-window-"+ i +"\">"+pointsArray[pointID]["destinationList"][i]["description"]+"</div></div>",
                 maxWidth: 700,
                 position: cityCircle.getCenter()
             });
@@ -283,7 +309,37 @@ foreach($rawPointsArray as $point){
         var infoString ="";
 
     }
-    google.maps.event.addDomListener(window, 'load', initialize);
+
+    function SpeedLegend(controlDiv, map) {
+
+        // Set CSS styles for the DIV containing the control
+        // Setting padding to 5 px will offset the control
+        // from the edge of the map
+        controlDiv.style.padding = '2px';
+
+        // Set CSS for the control border
+        var controlUI = document.createElement('div');
+        controlUI.style.backgroundColor = 'white';
+        controlUI.style.borderStyle = 'solid';
+        controlUI.style.borderWidth = '2px';
+        controlUI.style.cursor = 'pointer';
+        controlUI.style.textAlign = 'center';
+        controlUI.title = 'Click to set the map to Home';
+        controlDiv.appendChild(controlUI);
+
+        // Set CSS for the control interior
+        var controlText = document.createElement('div');
+        controlText.style.fontFamily = 'Arial,sans-serif';
+        controlText.style.fontSize = '12px';
+        controlText.style.paddingLeft = '4px';
+        controlText.style.paddingRight = '4px';
+        controlText.innerHTML = document.getElementById('testlegend').innerHTML;
+        controlUI.appendChild(controlText);
+    }
+    $(function() {
+        initialize();
+    });
+    //google.maps.event.addDomListener(window, 'load', initialize);
 
 </script>
 </body>
