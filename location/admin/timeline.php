@@ -37,6 +37,14 @@ for($i=0;$i<sizeof($stopPoints);$i+=1){
         "date"=>$tmpDateTime->format('Y-m-d'),
         "startTime"=>"0,0,0,".$tmpDateTime->format('H,i,s'),
         "endTime"=>"0,0,0,". ($tmpDateTime->format('d')==$tmpEndDateTime->format('d')?$tmpEndDateTime->format('H,i,s'):"23,59,59"));
+    while($tmpDateTime->format('d')!=$tmpEndDateTime->format('d')){
+        date_modify($tmpDateTime, '+1 day');
+        $formattedStopPoints[$tmpDateTime->format('Y-m-d')][] = array(
+            "locationID"=>$stopPoints[$i]['locationpoint_id'],
+            "date"=>$tmpDateTime->format('Y-m-d'),
+            "startTime"=>"0,0,0,0,0,0",
+            "endTime"=>"0,0,0,". ($tmpDateTime->format('d')==$tmpEndDateTime->format('d')?$tmpEndDateTime->format('H,i,s'):"23,59,59"));
+    }
 }
 
 //echo 'works' . sizeof($stopPoints);
