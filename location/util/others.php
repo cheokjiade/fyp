@@ -177,3 +177,82 @@ function mergePoints($pointsArray){
     $mergedPointsArray[] = $tempPoint;
     return $mergedPointsArray;
 }
+
+
+// distance between two points in kilometres
+// 3958      - Earth's radius (miles)
+// 3.1415926 - PI
+// 57.29578  - Number of degrees/radian (for conversion)
+// 1.609344  - meters = 0.001 mile
+function get_geo_distance_point_to_point($lat1, $lon1, $lat2, $lon2)
+{
+    return 	(3958 * 3.1415926 * sqrt(($lat2 - $lat1) * ($lat2 - $lat1)
+        + cos($lat2 / 57.29578) * cos($lat1 / 57.29578) * ($lon2 - $lon1) * ($lon2 - $lon1)) / 180) * 1609.344;
+}
+
+// get height from triangle where A or B are not obtuse
+function get_height_from_base_triangle($ab, $ac, $bc)
+{
+    // find $s (semiperimeter) for Heron's formula
+    $s = ($ab + $ac + $bc) / 2;
+
+    // Heron's formula - area of a triangle
+    $area = sqrt($s * ($s - $ab) * ($s - $ac) * ($s - $bc));
+
+    // find the height of a triangle - ie - distance from point to line segment
+    $height = $area / (.5 * $ab);
+
+    return $area;
+}
+
+// returns angles of a triangle from the sides
+function get_angles_from_sides($ab, $bc, $ac)
+{
+    $a = $bc;
+    $b = $ac;
+    $c = $ab;
+
+    $angle['a'] = rad2deg(acos((pow($b,2) + pow($c,2) - pow($a,2)) / (2 * $b * $c)));
+    $angle['b'] = rad2deg(acos((pow($c,2) + pow($a,2) - pow($b,2)) / (2 * $c * $a)));
+    $angle['c'] = rad2deg(acos((pow($a,2) + pow($b,2) - pow($c,2)) / (2 * $a * $b)));
+
+    return $angle;
+}
+
+// $a, $b, $c lat lon array of line segments ($a and $b) and the off point ($c)
+function get_geo_distance_point_to_segment($a, $b, $c)
+{
+    $ab = get_geo_distance_point_to_point($a['lat'], $a['lng'], $b['lat'], $b['lng']); // base or line segment
+    $ac = get_geo_distance_point_to_point($a['lat'], $a['lng'], $c['lat'], $c['lng']);
+    $bc = get_geo_distance_point_to_point($b['lat'], $b['lng'], $c['lat'], $c['lng']);
+
+    $angle = get_angles_from_sides($ab, $bc, $ac);
+
+    if($ab + $ac == $bc) // then points are collinear - point is on the line segment
+    {
+        return 0;
+    }
+    elseif($angle['a'] <= 90 && $angle['b'] <= 90) // A or B are not obtuse - return height as distance
+    {
+        return get_height_from_base_triangle($ab, $ac, $bc);
+    }
+    else // A or B are obtuse - return smallest side as distance
+    {
+        return ($ac > $bc) ? $bc : $ac;
+    }
+
+}
+/*
+	// line segment
+	$a['lat'] = 37.083667;
+	$a['lon'] = -1.84948;
+	$b['lat'] = 37.069149;
+	$b['lon'] = -1.849823;
+
+	// point
+	$c['lat'] = 37.14;
+	$c['lon'] = -1.85;
+
+	echo get_geo_distance_point_to_segment($a, $b, $c);
+*/
+?>
