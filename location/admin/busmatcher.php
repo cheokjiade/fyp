@@ -112,9 +112,9 @@ foreach($busstopsforroute as $routeID => $busStopList){
         $currentMatch = -1;
         $skipped = 0;
         for($i=0;$i<sizeof($busStops);$i++){
-            if($skipped==4){
+            /*if($skipped==4){
                 break;
-            }
+            } */
             if($initialMatch == -1){
                 for($j=0;$j<sizeof($busStopsInOrder);$j++){
                     if($busStopsInOrder[$j]['publictransportstops_id']==$busStops[$i]){
@@ -127,7 +127,22 @@ foreach($busstopsforroute as $routeID => $busStopList){
                 continue;
             }
             if($busStopsInOrder[$currentMatch+1]['publictransportstops_id']!=$busStops[$i]){
-                $skipped +=1;
+                for($k=$i;$k<sizeof($busStops);$k+=1){
+                    for($l=$currentMatch+1;$l<sizeof($busStopsInOrder);$l++){
+                        if($busStopsInOrder[$l]['publictransportstops_id']==$busStops[$k]){
+                            if($l-$currentMatch>3){
+                                $initialMatch = $l;
+                                $busStopsMatched = array();
+                            }
+                            $currentMatch = $l;
+                            $busStopsMatched[] = $busStops[$k];
+                            $i=$k;
+                            $skipped +=1;
+                            break 2;
+                        }
+                    }
+                }
+
             }
             else{
                 $currentMatch+=1;
