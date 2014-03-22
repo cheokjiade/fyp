@@ -16,7 +16,7 @@ if($_REQUEST['date']){
     }*/
     //Attempt to smooth out errors before returning
     //maximum travel time per second should not be more than 45 meters/sec(144km/hr)
-    $maxDistPerSec = 30;
+    $maxDistPerSec = 300;
     require_once('../../util/distance.php');
     $smoothedArray = array();
     $lastLat = 0;

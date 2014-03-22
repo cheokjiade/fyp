@@ -69,7 +69,7 @@ for($i=0;$i<sizeof($returnArray);$i+=1){
 $actualLat = 1.36996326781056;
 $actualLng = 103.85356664655984;
 
-print_r($distanceArray);
+//print_r($distanceArray);
 
 
 //$distanceArray = array();
@@ -107,9 +107,19 @@ sort($distanceArray);
 <div id="map-canvas"/>
 <script>
     var colors= new Array("#FF0055","#00FF00","#0000FF","#FFFF00","#FF00FF","#FFFFFF","#000000");
+    var busRouteArray = [];
     var locPoints = [];
     var pointsAcc = [];
     var pathArray = [];
+    <?php
+        foreach($busRouteArray as $busRoutePoint) {
+    ?>
+    busRouteArray.push(new google.maps.LatLng(<?php echo $busRoutePoint["lat"]?>, <?php echo $busRoutePoint["lng"]?>));
+        <?php
+            }
+        ?>
+
+
     <?php
     foreach($returnArray as $point){
     ?>
@@ -131,7 +141,17 @@ sort($distanceArray);
         var map = new google.maps.Map(document.getElementById('map-canvas'),
             mapOptions);
 
-        var marker = new google.maps.Marker({
+        var flightPath = new google.maps.Polyline({
+            path: busRouteArray,
+            geodesic: true,
+            strokeColor: '#FF0000',
+            strokeOpacity: 1.0,
+            strokeWeight: 2
+        });
+
+        flightPath.setMap(map);
+
+        /*var marker = new google.maps.Marker({
             position: new google.maps.LatLng(1.36996326781056, 103.85356664655984),
             map: map,
             title: 'Location'
@@ -163,7 +183,7 @@ sort($distanceArray);
             };
             // Add the circle for this city to the map.
             cityCircle = new google.maps.Circle(circleOptions);
-        }
+        }*/
     }
 
     google.maps.event.addDomListener(window, 'load', initialize);

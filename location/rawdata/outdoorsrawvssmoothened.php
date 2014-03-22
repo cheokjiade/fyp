@@ -1,6 +1,7 @@
 <?php
 error_reporting(E_ALL);
 ini_set('display_errors', 'On');
+
 function distanceGeoPoints ($lat1, $lng1, $lat2, $lng2) {
 
     $earthRadius = 3958.75;
@@ -21,40 +22,31 @@ function distanceGeoPoints ($lat1, $lng1, $lat2, $lng2) {
 
     return $geopointDistance;
 }
-$date = '2013-11-30';
+
+$date = '2013-12-16';
 require_once('../db/conn.php');
-require_once('../util/distance.php');
-$dateStart = $date . " 11:44:00";
-$dateEnd = $date . " 12:07:00";
-$query = $conn->prepare("SELECT location_lat, location_lng,	location_height, location_accuracy, location_time, session_hash FROM location WHERE location_time BETWEEN :dateStart AND :dateEnd");
+require_once('../util/others.php');
+$dateStart = $date . " 16:15:00";
+$dateEnd = $date . " 18:00:00";
+$query = $conn->prepare("SELECT location_lat, location_lng,	location_height, location_accuracy, location_time, session_hash FROM location WHERE (location_time BETWEEN :dateStart AND :dateEnd) AND session_hash = 'ff5d81d3b3c1034d3d722fbd3a037bab0e536887c4c122afc375502b1075fbac76e0c8e74dc1ede0b6e0ab9894153b62bc2c49a887d3f6c9982e09f3df801ce3'");
 $query->bindParam(":dateStart",$dateStart);
 $query->bindParam(":dateEnd",$dateEnd);
 $query->execute();
-$returnArray = $query->fetchAll(PDO::FETCH_ASSOC);
-
-$query = $conn->prepare("SELECT * FROM publictransportstops");
-$query->execute();
-$busStops = $query->fetchAll(PDO::FETCH_ASSOC);
-
-$potentialBusStopListArray = array();
-for($i=0;$i<sizeof($returnArray);$i+=1){
-    $busStopList = array();
-    foreach($busStops as $busStop){
-        $distanceFromBusStop = distanceGeoPoints($returnArray[$i]['location_lat'],$returnArray[$i]['location_lng'],$busStop['publictransportstops_lat'],$busStop['publictransportstops_lng'])
-        if($distanceFromBusStop < 500)
-    }
-}
-
-$actualLat = 1.36996326781056;
-$actualLng = 103.85356664655984;
+$returnArray = smoothPoints($query->fetchAll(PDO::FETCH_ASSOC));
+$pointArray =mergePoints(retrievePointsFromLocations($returnArray));
+$actualLat = 1.370706;
+$actualLng = 103.85283565217;
 $totalDistance = 0;
 $distanceArray = array();
+$maxDistance = 0;
 for($i=0;$i<sizeof($returnArray);$i+=1){
-    $distance = distance($actualLat,$actualLng,$returnArray[$i]['location_lat'],$returnArray[$i]['location_lng']);
+    $distance = distanceGeoPoints($actualLat,$actualLng,$returnArray[$i]['location_lat'],$returnArray[$i]['location_lng']);
     $totalDistance += $distance;
     $distanceArray[] = $distance;
+    if($distance > $maxDistance) $maxDistance = $distance;
 }
-asort($distanceArray);
+sort($distanceArray);
+print_r ($pointArray);
 ?>
 <html>
 <head>
@@ -75,8 +67,8 @@ asort($distanceArray);
 </head>
 <body>
 <div id='left'>
-    <p>Min: <?php echo $distanceArray[sizeof($returnArray)-1]?></p>
-    <p>Max: <?php echo $distanceArray[0]?></p>
+    <p>Min: <?php echo $distanceArray[0]?></p>
+    <p>Max: <?php echo $distanceArray[sizeof($returnArray)-1]?></p>
     <p>Mean: <?php echo $totalDistance/sizeof($distanceArray)?></p>
     <p>Median: <?php echo $distanceArray[sizeof($returnArray)/2]?></p>
 </div>
@@ -84,13 +76,20 @@ asort($distanceArray);
 <script>
     var colors= new Array("#FF0055","#00FF00","#0000FF","#FFFF00","#FF00FF","#FFFFFF","#000000");
     var locPoints = [];
+    var pointsArray = [];
     var pointsAcc = [];
     var pathArray = [];
     <?php
     foreach($returnArray as $point){
     ?>
     locPoints.push(new google.maps.LatLng(<?php echo $point["location_lat"]?>, <?php echo $point["location_lng"]?>));
-    pointsAcc.push(<?php echo $point["location_accuracy"]?>);
+
+    <?php
+    }
+    foreach($pointArray as $point){
+    ?>
+    pointsArray.push(new google.maps.LatLng(<?php echo $point["point_center_lat"]?>, <?php echo $point["point_center_lng"]?>));
+    pointsAcc.push(<?php echo $point["accuracy"]?>);
     <?php
     }
     ?>
@@ -108,34 +107,36 @@ asort($distanceArray);
             mapOptions);
 
         var marker = new google.maps.Marker({
-            position: new google.maps.LatLng(1.36996326781056, 103.85356664655984),
+            position: new google.maps.LatLng(1.370706, 103.852817),
             map: map,
             title: 'Location'
         });
-        var circleOptions = {
-            strokeColor: '#FF0000',
-            strokeOpacity: 0.8,
-            strokeWeight: 2,
-            fillColor: '#FF0000',
-            fillOpacity: 0.25,
-            map: map,
-            center: new google.maps.LatLng(1.36996326781056, 103.85356664655984),
-            radius: 50//locPoints[locPoint].population / 20
-        };
-        // Add the circle for this city to the map.
-        cityCircle = new google.maps.Circle(circleOptions);
         // Construct the circle for each value in citymap.
         // Note: We scale the population by a factor of 20.
         for (var i =0 ; i<locPoints.length;i++) {
             var circleOptions = {
                 strokeColor: '#FF0000',
-                strokeOpacity: 0.8,
+                strokeOpacity: 0.2,
                 strokeWeight: 2,
                 fillColor: '#FF0000',
                 fillOpacity: 0.25,
                 map: map,
                 center: locPoints[i],
                 radius: 1//locPoints[locPoint].population / 20
+            };
+            // Add the circle for this city to the map.
+            cityCircle = new google.maps.Circle(circleOptions);
+        }
+        for (var i =0 ; i<pointsArray.length;i++) {
+            var circleOptions = {
+                strokeColor: '#00FF00',
+                strokeOpacity: 0.8,
+                strokeWeight: 2,
+                fillColor: '#00FF00',
+                fillOpacity: 0.65,
+                map: map,
+                center: pointsArray[i],
+                radius: pointsAcc[i]//locPoints[locPoint].population / 20
             };
             // Add the circle for this city to the map.
             cityCircle = new google.maps.Circle(circleOptions);

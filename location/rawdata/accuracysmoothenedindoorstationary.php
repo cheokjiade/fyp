@@ -32,13 +32,19 @@ $query = $conn->prepare("SELECT location_lat, location_lng,	location_height, loc
 $query->bindParam(":dateStart",$dateStart);
 $query->bindParam(":dateEnd",$dateEnd);
 $query->execute();
-$returnArray = smoothPoints($query->fetchAll(PDO::FETCH_ASSOC));
+//$returnArray = smoothPoints($query->fetchAll(PDO::FETCH_ASSOC));
+$returnArray = $query->fetchAll(PDO::FETCH_ASSOC);
 $pointArray =mergePoints(retrievePointsFromLocations($returnArray));
 $actualLat = 1.370706;
 $actualLng = 103.85283565217;
 $totalDistance = 0;
 $distanceArray = array();
 $maxDistance = 0;
+for($i=0;$i<sizeof($returnArray);$i+=1){
+    echo "\n" . $returnArray[$i]['location_lat'];
+}
+
+
 for($i=0;$i<sizeof($returnArray);$i+=1){
     $distance = distanceGeoPoints($actualLat,$actualLng,$returnArray[$i]['location_lat'],$returnArray[$i]['location_lng']);
     $totalDistance += $distance;
