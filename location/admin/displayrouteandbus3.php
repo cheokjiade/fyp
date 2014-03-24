@@ -21,15 +21,13 @@ function distanceGeoPoints ($lat1, $lng1, $lat2, $lng2) {
 
     return $geopointDistance;
 }
-$date = '2013-11-30';
+
 require_once('../db/conn.php');
 require_once('../util/others.php');
 
-
-
-
-$dateStart = $date . " 11:49:00";
-$dateEnd = $date . " 12:07:00";
+$query = $conn->prepare("SELECT l.* FROM location l, routepoint rp WHERE l.session_hash = rp.session_hash AND l.location_time = rp.location_time AND rp.route_id = 31 ORDER BY l.location_time");
+$query->execute();
+$returnArray = $query->fetchAll(PDO::FETCH_ASSOC);
 
 $query = $conn->prepare("SELECT publictransportstops_id, publictransportstops_lat AS lat, publictransportstops_lng AS lng FROM publictransportstops;;");
 $query->execute();
@@ -70,7 +68,7 @@ foreach($routes as $route){
 
 }
 
-print_r($busstopsforroute);
+//print_r($busstopsforroute);
 $routesAndMatchedBusServices = array();
 foreach($busstopsforroute as $routeID => $busStopList){
     set_time_limit(100);
@@ -157,10 +155,28 @@ foreach($busstopsforroute as $routeID => $busStopList){
             $routesAndMatchedBusServices[$routeID][$busServices] = $busStopsMatched;
         }
     }
-
-
 }
-print_r($routesAndMatchedBusServices);
+$busServicesRouteArray = $routesAndMatchedBusServices['31'];
+$allBusArray = array();
+foreach($busServicesRouteArray as $key => $valueList){
+    $busArray = array();
+    $busServiceDetails = explode(';',$key);
+    $query = $conn->prepare("SELECT publictransportstops_id FROM publictransportservicestops WHERE publictransportservices_id = :publictransportservices_id AND publictransportservices_route_id = :publictransportservices_route_id AND publictransportservicestops_order >=
+                            (SELECT publictransportservicestops_order FROM publictransportservicestops WHERE publictransportstops_id = :publictransportstops_id AND publictransportservices_id = :publictransportservices_id LIMIT 1) ORDER BY publictransportservicestops_order;");
+    $query->bindParam(":publictransportstops_id",$valueList[0]);
+    $query->bindParam(":publictransportservices_id",$busServiceDetails[0]);
+    $query->bindParam(":publictransportservices_route_id",$busServiceDetails[1]);
+    $query->execute();
+    $busStopsArray = $query->fetchAll(PDO::FETCH_ASSOC);
+
+    foreach($busStopsArray as $busStop){
+        $query = $conn->prepare("SELECT publictransportstops_lat AS lat, publictransportstops_lng AS lng FROM publictransportstops WHERE publictransportstops_id = :publictransportstops_id;");
+        $query->bindParam(":publictransportstops_id",$busStop['publictransportstops_id']);
+        $query->execute();
+        $busArray[] = $query->fetch(PDO::FETCH_ASSOC);
+    }
+    $allBusArray[] = $busArray;
+}
 //for($i=0;$i<sizeof($returnArray);$i+=1){
 //    $nearestPoint = 1000;
 //    for($j=0;j<sizeof($busRouteArray);$j+=1){
@@ -193,11 +209,11 @@ print_r($routesAndMatchedBusServices);
     <title>Route Viewer</title>
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
     <style type="text/css">
-    html { height: 100% }
+        html { height: 100% }
         body { height: 100%; margin: 0; padding: 0 }
 
     </style>
-    <link rel="stylesheet/less" type="text/css" href="../styles/styles.less" />
+    <link rel="stylesheet/less" type="text/css" href="../styles/fullmapstyles.less" />
     <script src="../scripts/less-1.4.1.min.js" type="text/javascript"></script>
     <script type="text/javascript"
             src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC5AN7Cbf3jecSlyOUHNNoCPE1ZJc6wGEw&sensor=true">
@@ -208,30 +224,39 @@ print_r($routesAndMatchedBusServices);
 <div id='left'>
 
 </div>
-<!--<div id="map-canvas"/>
+<div id="map-canvas"/>
 <script>
-    var colors= new Array("#FF0055","#00FF00","#0000FF","#FFFF00","#FF00FF","#FFFFFF","#000000");
+    var colors= new Array("#FF0055","#00FF00","#0000FF","#FFFF00","#FF00FF");
     var busRouteArray = [];
     var locPoints = [];
     var pointsAcc = [];
     var pathArray = [];
+    var allBusArray = [];
     <?php
-        foreach($busRouteArray as $busRoutePoint) {
+        foreach($returnArray as $point) {
     ?>
-    busRouteArray.push(new google.maps.LatLng(<?php echo $busRoutePoint["lat"]?>, <?php echo $busRoutePoint["lng"]?>));
-        <?php
+    busRouteArray.push(new google.maps.LatLng(<?php echo $point["location_lat"]?>, <?php echo $point["location_lng"]?>));
+    <?php
+        }
+    ?>
+    <?php
+        $counter = 0;
+        foreach($allBusArray as $busArray){
+            echo 'var busArray'.$counter.' = [];' . "\n";
+            foreach($busArray as $stops){
+    ?>
+            busArray<?php echo $counter?>.push(new google.maps.LatLng(<?php echo $stops["lat"]?>, <?php echo $stops["lng"]?>));
+    <?php
             }
-        ?>
 
+    ?>
+            allBusArray.push(busArray<?php echo $counter?>);
+    <?php
+        $counter+=1;
+        }
 
-    <?php
-    foreach($returnArray as $point){
     ?>
-    locPoints.push(new google.maps.LatLng(<?php echo $point["location_lat"]?>, <?php echo $point["location_lng"]?>));
-    pointsAcc.push(<?php echo $point["location_accuracy"]?>);
-    <?php
-    }
-    ?>
+
 
     function initialize() {
         // Create the map.
@@ -250,47 +275,69 @@ print_r($routesAndMatchedBusServices);
             geodesic: true,
             strokeColor: '#FF0000',
             strokeOpacity: 1.0,
-            strokeWeight: 2
+            strokeWeight: 3
         });
 
         flightPath.setMap(map);
-
-        /*var marker = new google.maps.Marker({
-            position: new google.maps.LatLng(1.36996326781056, 103.85356664655984),
-            map: map,
-            title: 'Location'
-        });
-        var circleOptions = {
-            strokeColor: '#FF0000',
-            strokeOpacity: 0.8,
-            strokeWeight: 2,
-            fillColor: '#FF0000',
-            fillOpacity: 0.25,
-            map: map,
-            center: new google.maps.LatLng(1.36996326781056, 103.85356664655984),
-            radius: 50//locPoints[locPoint].population / 20
-        };
-        // Add the circle for this city to the map.
-        cityCircle = new google.maps.Circle(circleOptions);
-        // Construct the circle for each value in citymap.
-        // Note: We scale the population by a factor of 20.
-        for (var i =0 ; i<locPoints.length;i++) {
-            var circleOptions = {
-                strokeColor: '#FF0000',
-                strokeOpacity: 0.8,
-                strokeWeight: 2,
-                fillColor: '#FF0000',
-                fillOpacity: 0.25,
+        for (var i =0 ; i<allBusArray.length;i++) {
+            var flightPath = new google.maps.Polyline({
+                path: allBusArray[i],
+                geodesic: true,
                 map: map,
-                center: locPoints[i],
-                radius: 1//locPoints[locPoint].population / 20
-            };
-            // Add the circle for this city to the map.
-            cityCircle = new google.maps.Circle(circleOptions);
-        }*/
+                strokeColor: colors[i%4],
+                strokeOpacity: 0.6,
+                strokeWeight: 2
+            });
+            for (var j =0 ; j<allBusArray[i].length;j++){
+                cityCircle = new google.maps.Circle({
+                    strokeColor: '#FF0000',
+                    strokeOpacity: 0.8,
+                    strokeWeight: 2,
+                    fillColor: '#FF0000',
+                    fillOpacity: 0.25,
+                    map: map,
+                    center: allBusArray[i][j],
+                    radius: 600//locPoints[locPoint].population / 20
+                });
+            }
+
+        }
+        /*var marker = new google.maps.Marker({
+         position: new google.maps.LatLng(1.36996326781056, 103.85356664655984),
+         map: map,
+         title: 'Location'
+         });
+         var circleOptions = {
+         strokeColor: '#FF0000',
+         strokeOpacity: 0.8,
+         strokeWeight: 2,
+         fillColor: '#FF0000',
+         fillOpacity: 0.25,
+         map: map,
+         center: new google.maps.LatLng(1.36996326781056, 103.85356664655984),
+         radius: 50//locPoints[locPoint].population / 20
+         };
+         // Add the circle for this city to the map.
+         cityCircle = new google.maps.Circle(circleOptions);
+         // Construct the circle for each value in citymap.
+         // Note: We scale the population by a factor of 20.
+         for (var i =0 ; i<locPoints.length;i++) {
+         var circleOptions = {
+         strokeColor: '#FF0000',
+         strokeOpacity: 0.8,
+         strokeWeight: 2,
+         fillColor: '#FF0000',
+         fillOpacity: 0.25,
+         map: map,
+         center: locPoints[i],
+         radius: 1//locPoints[locPoint].population / 20
+         };
+         // Add the circle for this city to the map.
+         cityCircle = new google.maps.Circle(circleOptions);
+         }*/
     }
 
     google.maps.event.addDomListener(window, 'load', initialize);
-</script> -->
+</script>
 </body>
 </html>
