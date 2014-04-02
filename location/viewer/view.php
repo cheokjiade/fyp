@@ -1,0 +1,206 @@
+<?php
+/**
+ * Created by IntelliJ IDEA.
+ * User: Me
+ * Date: 4/2/14
+ * Time: 9:02 PM
+ * To change this template use File | Settings | File Templates.
+ */
+error_reporting(E_ALL);
+ini_set('display_errors', 'On');
+require_once('../db/conn.php');
+$userName = $_REQUEST['username'];
+$passWord = $_REQUEST['password'];
+$sessionHash = "";
+
+$query = $conn->prepare("SELECT s.session_hash FROM userdata u, session s WHERE s.userdata_id = u.userdata_id AND u.userdata_email = :userdata_email AND u.userdata_password = :userdata_password ORDER BY s.session_timestamp DESC");
+$query->bindParam(":userdata_email",$userName);
+$query->bindParam(":userdata_password",$passWord);
+$query->execute();
+$sessionArray = $query->fetchAll(PDO::FETCH_ASSOC);
+if(sizeof($sessionArray)>0){
+    $sessionHash = $sessionArray[0]['session_hash'];
+}
+
+?>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Jia De's FYP - Viewer</title>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+    <style type="text/css">
+        html { height: 100% }
+        body { height: 100%; margin: 0; padding: 0 }
+
+        .extruder.left.a .flap{
+            font-size:18px;
+            color:white;
+            top:0;
+            padding:10px 0 10px 10px;
+            background:#772B14;
+            width:30px;
+            position:absolute;
+            right:0;
+            -moz-border-radius:0 10px 10px 0;
+            -webkit-border-top-right-radius:10px;
+            -webkit-border-bottom-right-radius:10px;
+            -moz-box-shadow:#666 2px 0px 3px;
+            -webkit-box-shadow:#666 2px 0px 3px;
+        }
+
+        .extruder.left.a .content{
+            border-right:3px solid #772B14;
+            background:rgba(255,255,255,.95);
+        }
+
+    </style>
+    <link rel="stylesheet/less" type="text/css" href="../styles/styles.less" />
+    <script src="../scripts/less-1.4.1.min.js" type="text/javascript"></script>
+    <script type="text/javascript"
+            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC5AN7Cbf3jecSlyOUHNNoCPE1ZJc6wGEw&sensor=true">
+    </script>
+    <script src="../scripts/jquery-2.0.3.min.js" type="text/javascript"></script>
+    <link rel="stylesheet/less" type="text/css" href="../extruder/css/mbExtruder.css" />
+    <script src="../extruder/inc/jquery.hoverIntent.min.js" type="text/javascript"></script>
+    <script src="../extruder/inc/jquery.mb.flipText.js" type="text/javascript"></script>
+    <script src="../extruder/inc/mbExtruder.js" type="text/javascript"></script>
+    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+    <script type="text/javascript">
+
+    </script>
+    <script type="text/javascript">
+        $(function(){
+            $("#extruderLeft").buildMbExtruder({
+                width:450,
+                position:"left",
+                flapDim:"100%",
+                extruderOpacity:1,
+                onClose:function(){},
+                onContentLoad: function(){}
+            });
+        });
+        google.load("visualization", "1", {packages:["corechart"]});
+        //google.setOnLoadCallback(drawChart);
+        var sessionHash = "<?php echo $sessionHash; ?>";
+        var path = new Array();
+        var colors= new Array("#FF0055","#00FF00","#0000FF","#FFFF00","#FF00FF","#FFFFFF","#000000");
+        var map;
+        var pathCoordinates;
+        Array.prototype.clear = function()  //Add a new method to the Array Object
+        {
+            var i;
+            for(i=0;i<this.length;i++)
+            {
+                this.pop();
+            }
+        }
+        function drawChart(chart_data) {
+            var data = google.visualization.arrayToDataTable(chart_data);
+            var options = {
+                title: 'Time Spent At Points'
+            };
+            var chart = new google.visualization.PieChart(document.getElementById('pie-time'));
+            chart.draw(data, options);
+        }
+        function initialize() {
+            var mapOptions = {
+                center: new google.maps.LatLng(1.3708097, 103.8529281),
+                zoom: 13,
+                mapTypeId: google.maps.MapTypeId.ROADMAP
+            };
+            map = new google.maps.Map(document.getElementById("map-canvas"),
+                mapOptions);
+
+            pathCoordinates = [
+                new google.maps.LatLng(37.772323, -122.214897),
+                new google.maps.LatLng(21.291982, -157.821856),
+                new google.maps.LatLng(-18.142599, 178.431),
+                new google.maps.LatLng(-27.46758, 153.027892)
+            ];
+
+
+        }
+
+        function addLine(pathCoordinates) {
+
+            var count = 0;
+            for(var i in pathCoordinates){
+                var tmpPath= new google.maps.Polyline({
+                    path: pathCoordinates[i],
+                    map: map,
+                    strokeColor: colors[count++],
+                    strokeOpacity: 1.0,
+                    strokeWeight: 2
+                });
+                //path[i].setPath(pathCoordinates[i]);
+                //path[i].setMap(map);
+                path.push(tmpPath);
+            }
+        }
+
+        function removeLine() {
+            for(i=0;i<path.length;i++){
+                path[i].setMap(null);
+            }
+            path.clear();
+
+        }
+
+        google.maps.event.addDomListener(window, 'load', initialize);
+    </script>
+</head>
+<body>
+<div id="left">
+    <div id="title">
+        title
+    </div>
+    <div id="datelist" style="height: 90%; float: left; white-space: nowrap; padding: 5px">
+        <div id="datelist-title" style="overflow: auto";>Dates</div>
+        <ul>
+            <?php
+            $sql = "SELECT DISTINCT CAST(`location_time` AS DATE ) AS uniqueDate FROM location ORDER BY uniqueDate;";
+            foreach ($conn->query($sql) as $row) {
+                ?>
+                <li class="dateSelector"><?php echo $row['uniqueDate']?></li>
+            <?php
+            }
+            ?>
+        </ul>
+    </div>
+    <div id="detailse" style="float: right; height: 100%;">
+        <div id="pie-time" style="height: 30%;"></div>
+        <div id="timeline"  style="height: 30%;"></div>
+    </div>
+
+</div>
+<div id="map-canvas"/>
+
+<script>
+    $(".dateSelector").click(function() {
+        //alert( $(this).text() +"Handler for .click() called." );
+        $.post("../services/viewer/viewByDate.php",{date:$(this).text(), sessionHash:sessionHash},function( data ) {
+            var pathArray = new Array();
+            $.each(data, function(i, item){
+                var tmpMid = item.session_hash;
+                if(!(tmpMid in pathArray)){
+                    pathArray[tmpMid]=new Array();
+                }
+                pathArray[item.session_hash].push(new google.maps.LatLng(item.location_lat, item.location_lng));
+            });
+            removeLine();
+            addLine(pathArray);
+            //alert( data[0]['location_lat'] ); // John
+            //alert( data[1] ); // 2pm
+        }, "json");
+        $.post("../services/viewer/viewTimeAtPoints.php",{date:$(this).text(), sessionHash:sessionHash},function( data ) {
+            //alert(data);
+            drawChart(data);
+        }, "json");
+
+    });
+
+
+</script>
+</body>
+
+</html>
