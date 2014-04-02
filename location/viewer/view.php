@@ -79,7 +79,7 @@ if(sizeof($sessionArray)>0){
                 onContentLoad: function(){}
             });
         });
-        google.load("visualization", "1", {packages:["corechart"]});
+        google.load("visualization", "1", {packages:["corechart","timeline"]});
         //google.setOnLoadCallback(drawChart);
         var sessionHash = "<?php echo $sessionHash; ?>";
         var path = new Array();
@@ -102,6 +102,22 @@ if(sizeof($sessionArray)>0){
             var chart = new google.visualization.PieChart(document.getElementById('pie-time'));
             chart.draw(data, options);
         }
+
+        function drawTimeline(timeline_data) {
+
+            var container = document.getElementById('timeline');
+            var chart = new google.visualization.Timeline(container);
+
+            var dataTable = new google.visualization.DataTable();
+            dataTable.addColumn({ type: 'string', id: 'Day' });
+            dataTable.addColumn({ type: 'string', id: 'Activity' });
+            dataTable.addColumn({ type: 'date', id: 'Start' });
+            dataTable.addColumn({ type: 'date', id: 'End' });
+            dataTable.addRows(timeline_data);
+
+            chart.draw(dataTable);
+        }
+
         function initialize() {
             var mapOptions = {
                 center: new google.maps.LatLng(1.3708097, 103.8529281),
@@ -151,8 +167,8 @@ if(sizeof($sessionArray)>0){
 </head>
 <body>
 <div id="left">
-    <div id="title">
-        title
+    <div id="title" style="text-align: center">
+        Location Viewer
     </div>
     <div id="datelist" style="height: 90%; float: left; white-space: nowrap; padding: 5px">
         <div id="datelist-title" style="overflow: auto";>Dates</div>
@@ -167,9 +183,9 @@ if(sizeof($sessionArray)>0){
             ?>
         </ul>
     </div>
-    <div id="detailse" style="float: right; height: 100%;">
-        <div id="pie-time" style="height: 30%;"></div>
-        <div id="timeline"  style="height: 30%;"></div>
+    <div id="details" style="float: right; height: 100%;">
+        <div id="pie-time" style="height: 40%;"></div>
+        <div id="timeline"  style="height: 20%;"></div>
     </div>
 
 </div>
@@ -195,6 +211,16 @@ if(sizeof($sessionArray)>0){
         $.post("../services/viewer/viewTimeAtPoints.php",{date:$(this).text(), sessionHash:sessionHash},function( data ) {
             //alert(data);
             drawChart(data);
+        }, "json");
+        $.post("../services/viewer/viewTimeline.php",{date:$(this).text(), sessionHash:sessionHash},function( data ) {
+            var pathArray = new Array();
+            $.each(data, function(i, item){
+                pathArray.push(["Timeline",item.locationID,eval("new Date("+item.startTime+")"),eval("new Date("+item.endTime+")")]);
+            });
+            //alert(pathArray);
+            drawTimeline(pathArray);
+            //alert( data[0]['location_lat'] ); // John
+            //alert( data[1] ); // 2pm
         }, "json");
 
     });
