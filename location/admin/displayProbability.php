@@ -106,15 +106,35 @@ foreach($rawPointsArray as $point){
     <ul class="legend-holder">
         <li class="legend-item">
             <div class="input-color">
-                <!--<input type="text" value="Orange" />--><div class="legend-text">test</div>
-                <div class="color-box" style="background-color: #FF850A;"></div>
+                <!--<input type="text" value="Orange" />--><div class="legend-text">1km/h</div>
+                <div class="color-box" style="background-color: #3ADF00;"></div>
                 <!-- Replace "#FF850A" to change the color -->
             </div>
         </li><!--
         --><li class="legend-item">
             <div class="input-color">
-                <div class="legend-text">test</div>
-                <div class="color-box" style="background-color: navy;"></div>
+                <div class="legend-text">2km/h</div>
+                <div class="color-box" style="background-color: #4B8A08;"></div>
+                <!-- Replace "navy" to change the color -->
+            </div>
+        </li><!--
+        --><li class="legend-item">
+            <div class="input-color">
+                <div class="legend-text">4km/h</div>
+                <div class="color-box" style="background-color: #868A08;"></div>
+                <!-- Replace "navy" to change the color -->
+            </div>
+        </li><!--
+        --><li class="legend-item">
+            <div class="input-color">
+                <div class="legend-text">20km/h</div>
+                <div class="color-box" style="background-color: #8A4B08;"></div>
+                <!-- Replace "navy" to change the color -->
+            </div><!--
+        --><li class="legend-item">
+            <div class="input-color">
+                <div class="legend-text">40km/h</div>
+                <div class="color-box" style="background-color: #B43104;"></div>
                 <!-- Replace "navy" to change the color -->
             </div>
         </li>

@@ -84,6 +84,10 @@ if(sizeof($sessionArray)>0){
         var sessionHash = "<?php echo $sessionHash; ?>";
         var path = new Array();
         var colors= new Array("#FF0055","#00FF00","#0000FF","#FFFF00","#FF00FF","#FFFFFF","#000000");
+        var points = [];
+        var pointInfoWindows = [];
+        var pointType = "Constant";
+        var pointSelector = "All";
         var map;
         var pathCoordinates;
         Array.prototype.clear = function()  //Add a new method to the Array Object
@@ -162,6 +166,43 @@ if(sizeof($sessionArray)>0){
 
         }
 
+        function addPoint(pointArray){
+            for (var i =0 ; i<pointArray.length;i++) {
+                var tmpCircle = new google.maps.Circle({
+                    strokeColor: '#00FF00',
+                    strokeOpacity: 0.8,
+                    strokeWeight: 2,
+                    fillColor: '#00FF00',
+                    fillOpacity: 0.25,
+                    map: map,
+                    center: new google.maps.LatLng(pointArray[i].lat,pointArray[i].lng),
+                    radius: (pointType=="Constant")?40:(pointType=="Accuracy")?pointArray[i].acc:pointArray[i].count//locPoints[locPoint].population / 20
+                });
+                points.push(tmpCircle);
+                var infoWindow = new google.maps.InfoWindow({
+                    content: "<div class=\"infowindow\">" +
+                        "<div>Hours Spent : "+(parseInt(pointArray[i].totaltime)/60)+"</div>" +
+                        "<div>Average Time Spent : "+(parseInt(pointArray[i].totaltime)/parseInt(pointArray[i].count))+"</div>" +
+                        "<div>Average Accuracy : "+pointArray[i].acc+" </div></div>",
+                    maxWidth: 700,
+                    position: tmpCircle.getCenter()
+                });
+                infoWindow.open(map);
+                pointInfoWindows.push(infoWindow);
+            }
+        }
+
+        function removePoints(){
+            for(i=0;i<points.length;i++){
+                points[i].setMap(null);
+            }
+            points.clear();
+            for(i=0;i<pointInfoWindows.length;i++){
+                pointInfoWindows[i].close();
+            }
+            pointInfoWindows.clear();
+        }
+
         google.maps.event.addDomListener(window, 'load', initialize);
     </script>
 </head>
@@ -169,6 +210,24 @@ if(sizeof($sessionArray)>0){
 <div id="left">
     <div id="title" style="text-align: center">
         Location Viewer
+        <div id="points-text" class="showPoints" style="float: right">
+            Show Points
+        </div>
+        <div id="day-selector" class="day-selector" style="float: right">
+            Day
+        </div>
+        <div id="all-selector" class="all-selector" style="float: right">
+            All
+        </div>
+        <div id="radius-type-constant-selector" class="all-selector" style="float: right">
+            Constant
+        </div>
+        <div id="radius-type-count-selector" class="all-selector" style="float: right">
+            Count
+        </div>
+        <div id="radius-type-accuracy-selector" class="all-selector" style="float: right">
+            Accuracy
+        </div>
     </div>
     <div id="datelist" style="height: 90%; float: left; white-space: nowrap; padding: 5px">
         <div id="datelist-title" style="overflow: auto";>Dates</div>
@@ -192,8 +251,23 @@ if(sizeof($sessionArray)>0){
 <div id="map-canvas"/>
 
 <script>
+    $(".day-selector").click(function() {
+        pointSelector = "Day";
+    });
+    $(".all-selector").click(function() {
+        pointSelector = "All";
+    });
     $(".dateSelector").click(function() {
         //alert( $(this).text() +"Handler for .click() called." );
+        if(pointSelector=="Day"){
+            $.post("../services/viewer/viewPoints.php",{date:$(this).text(), sessionHash:sessionHash},function( data ) {
+                removeLine();
+                removePoints();
+                addPoint(data);
+                //alert( data[0]['location_lat'] ); // John
+                //alert( data[1] ); // 2pm
+            }, "json");
+        }
         $.post("../services/viewer/viewByDate.php",{date:$(this).text(), sessionHash:sessionHash},function( data ) {
             var pathArray = new Array();
             $.each(data, function(i, item){
@@ -224,7 +298,19 @@ if(sizeof($sessionArray)>0){
         }, "json");
 
     });
+    $(".showPoints").click(function() {
+        //alert( $(this).text() +"Handler for .click() called." );
+        if(pointSelector=="All"){
+            $.post("../services/viewer/viewPoints.php",{sessionHash:sessionHash},function( data ) {
+                removeLine();
+                removePoints();
+                addPoint(data);
+                //alert( data[0]['location_lat'] ); // John
+                //alert( data[1] ); // 2pm
+            }, "json");
+        }
 
+    });
 
 </script>
 </body>

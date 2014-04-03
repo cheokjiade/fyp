@@ -15,7 +15,7 @@ if(isset($_REQUEST['date'])){
     $date = $_REQUEST['date'];
     $dateStart = $date . " 00:00:00";
     $dateEnd = $date . " 23:59:59";
-    $query = $conn->prepare("SELECT *, SUM(stop_time) AS totaltime FROM
+    $query = $conn->prepare("SELECT *,stoppoint_center_lat as lat,stoppoint_center_lng as lng, stoppoint_accuracy as acc, SUM(stop_time) AS totaltime, COUNT(stop_time) AS count FROM
         (SELECT *, time_to_sec(timediff(stoppoint_end_time,stoppoint_start_time))/60 AS stop_time FROM fyp.stoppoint WHERE session_hash = :sessionHash AND ((stoppoint_end_time BETWEEN :dateStart AND :dateEnd) OR (stoppoint_start_time BETWEEN :dateStart AND :dateEnd))) st
         GROUP BY locationpoint_id
         ORDER BY SUM(stop_time) DESC");
@@ -25,7 +25,7 @@ if(isset($_REQUEST['date'])){
     $query->execute();
     $returnArray = $query->fetchAll(PDO::FETCH_ASSOC);
 }else{
-    $query = $conn->prepare("SELECT *, SUM(stop_time) AS totaltime FROM
+    $query = $conn->prepare("SELECT *,stoppoint_center_lat as lat,stoppoint_center_lng as lng, stoppoint_accuracy as acc, COUNT(stop_time) AS count, SUM(stop_time) AS totaltime FROM
         (SELECT *, time_to_sec(timediff(stoppoint_end_time,stoppoint_start_time))/60 AS stop_time FROM fyp.stoppoint WHERE session_hash = :sessionHash) st
         GROUP BY locationpoint_id
         ORDER BY SUM(stop_time) DESC");
@@ -33,3 +33,5 @@ if(isset($_REQUEST['date'])){
     $query->execute();
     $returnArray = $query->fetchAll(PDO::FETCH_ASSOC);
 }
+print json_encode($returnArray);
+$conn = null;
