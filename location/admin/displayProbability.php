@@ -114,27 +114,41 @@ foreach($rawPointsArray as $point){
         --><li class="legend-item">
             <div class="input-color">
                 <div class="legend-text">2km/h</div>
-                <div class="color-box" style="background-color: #4B8A08;"></div>
+                <div class="color-box" style="background-color: #5bf4c5;"></div>
                 <!-- Replace "navy" to change the color -->
             </div>
         </li><!--
         --><li class="legend-item">
             <div class="input-color">
                 <div class="legend-text">4km/h</div>
-                <div class="color-box" style="background-color: #868A08;"></div>
+                <div class="color-box" style="background-color: #3289ea;"></div>
                 <!-- Replace "navy" to change the color -->
             </div>
         </li><!--
         --><li class="legend-item">
             <div class="input-color">
-                <div class="legend-text">20km/h</div>
-                <div class="color-box" style="background-color: #8A4B08;"></div>
+                <div class="legend-text">10km/h</div>
+                <div class="color-box" style="background-color: #fccb0f;"></div>
                 <!-- Replace "navy" to change the color -->
             </div><!--
         --><li class="legend-item">
             <div class="input-color">
-                <div class="legend-text">40km/h</div>
-                <div class="color-box" style="background-color: #B43104;"></div>
+                <div class="legend-text">20km/h</div>
+                <div class="color-box" style="background-color: #ea3424;"></div>
+                <!-- Replace "navy" to change the color -->
+            </div>
+        </li><!--
+        --><li class="legend-item">
+            <div class="input-color">
+                <div class="legend-text">35km/h</div>
+                <div class="color-box" style="background-color: #fffc65;"></div>
+                <!-- Replace "navy" to change the color -->
+            </div>
+        </li><!--
+        --><li class="legend-item">
+            <div class="input-color">
+                <div class="legend-text">50km/h+</div>
+                <div class="color-box" style="background-color: #3B0B0B;"></div>
                 <!-- Replace "navy" to change the color -->
             </div>
         </li>
@@ -146,7 +160,7 @@ foreach($rawPointsArray as $point){
     var sessionHash = '<?php echo $sessionHash;?>';
     var pointsArray = <?php echo json_encode($pointsArray);?>;
     var pointsIDArray = <?php echo json_encode($pointsIDArray);?>;
-    var colors= new Array("#3ADF00","#4B8A08","#868A08","#8A4B08","#B43104","#B40404","#3B0B0B");
+    var colors= new Array("#3ADF00","#5bf4c5","#3289ea","#fccb0f","#ea3424","#fffc65","#3B0B0B");
     var locPoints = [];
     var pointsAcc = [];
     var pathArray = [];

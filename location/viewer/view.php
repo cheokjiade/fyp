@@ -257,6 +257,12 @@ if(sizeof($sessionArray)>0){
     $(".all-selector").click(function() {
         pointSelector = "All";
     });
+    $(".all-selector").click(function() {
+        pointSelector = "All";
+    });
+    $(".all-selector").click(function() {
+        pointSelector = "All";
+    });
     $(".dateSelector").click(function() {
         //alert( $(this).text() +"Handler for .click() called." );
         if(pointSelector=="Day"){
