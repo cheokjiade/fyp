@@ -5,8 +5,9 @@ ini_set('display_errors', 'On');
 
 require_once('../db/conn.php');
 require_once('../util/others.php');
-
-$query = $conn->prepare("SELECT l.* FROM location l, routepoint rp WHERE l.session_hash = rp.session_hash AND l.location_time = rp.location_time AND rp.route_id = 31 ORDER BY l.location_time");
+$route_id = !isset($_REQUEST['r']) ? 31 : $_REQUEST['r'];
+$query = $conn->prepare("SELECT l.* FROM location l, routepoint rp WHERE l.session_hash = rp.session_hash AND l.location_time = rp.location_time AND rp.route_id = :route_id ORDER BY l.location_time");
+$query->bindParam(":route_id",$route_id);
 $query->execute();
 $returnArray = $query->fetchAll(PDO::FETCH_ASSOC);
 
