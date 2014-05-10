@@ -9,18 +9,7 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 'On');
 require_once('../../db/conn.php');
-$userName = $_REQUEST['username'];
-$passWord = $_REQUEST['password'];
-$sessionHash = "";
-
-$query = $conn->prepare("SELECT s.session_hash FROM userdata u, session s WHERE s.userdata_id = u.userdata_id AND u.userdata_email = :userdata_email AND u.userdata_password = :userdata_password ORDER BY s.session_timestamp DESC");
-$query->bindParam(":userdata_email",$userName);
-$query->bindParam(":userdata_password",$passWord);
-$query->execute();
-$sessionArray = $query->fetchAll(PDO::FETCH_ASSOC);
-if(sizeof($sessionArray)>0){
-    $sessionHash = $sessionArray[0]['session_hash'];
-}
+$sessionHash = $_REQUEST['sessionHash'];
 
 $query = $conn->prepare("SELECT DISTINCT DATE(stoppoint_start_time) AS udate,DAYNAME(stoppoint_start_time) AS uname FROM stoppoint WHERE session_hash = :session_hash ORDER BY stoppoint_start_time ;");
 $query->bindParam(":session_hash",$sessionHash);

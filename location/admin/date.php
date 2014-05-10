@@ -2,10 +2,10 @@
 /**
  * Created by IntelliJ IDEA.
  * User: Me
- * Date: 5/9/14
- * Time: 12:15 AM
+ * Date: 5/10/14
+ * Time: 3:26 PM
  * To change this template use File | Settings | File Templates.
-*/
+ */
 ?>
 <html>
 <head>
@@ -49,9 +49,10 @@
     <script src="../extruder/inc/jquery.mb.flipText.js" type="text/javascript"></script>
     <script src="../extruder/inc/mbExtruder.js" type="text/javascript"></script>
     <script type="text/javascript" src="https://www.google.com/jsapi"></script>
-    <script type="text/javascript">
 
-    </script>
+    <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/themes/smoothness/jquery-ui.css" />
+    <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/jquery-ui.min.js"></script>
+
     <script type="text/javascript">
         $(function(){
             $("#extruderLeft").buildMbExtruder({
@@ -115,6 +116,20 @@
 </head>
 <body>
 <div id="clickme">Click Me</div>
+<span id='datepicker-container' style='font-size:200%'><div id="datepicker"></div></span>
+
+
+<script>
+    $( "#datepicker" ).datepicker({
+        onSelect: function(date) {
+            alert(date);
+        },
+        dateFormat: "yy-mm-dd",
+        defaultDate: "2013-11-11",
+        maxDate:"2014-01-01",
+        minDate:"2013-10-06"
+    });
+</script>
 <div id="timeline"  style="height: 50%;"></div>
 <script>
     $("#clickme").click(function() {

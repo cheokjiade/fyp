@@ -25,7 +25,10 @@ function distanceGeoPoints ($lat1, $lng1, $lat2, $lng2) {
 require_once('../db/conn.php');
 require_once('../util/others.php');
 
-$query = $conn->prepare("SELECT l.* FROM location l, routepoint rp WHERE l.session_hash = rp.session_hash AND l.location_time = rp.location_time AND rp.route_id = 31 ORDER BY l.location_time");
+$route_id = !isset($_REQUEST['r']) ? 31 : $_REQUEST['r'];
+
+$query = $conn->prepare("SELECT l.* FROM location l, routepoint rp WHERE l.session_hash = rp.session_hash AND l.location_time = rp.location_time AND rp.route_id = :route_id ORDER BY l.location_time");
+$query->bindParam(":route_id",$route_id);
 $query->execute();
 $returnArray = $query->fetchAll(PDO::FETCH_ASSOC);
 
@@ -33,7 +36,8 @@ $query = $conn->prepare("SELECT publictransportstops_id, publictransportstops_la
 $query->execute();
 $publicTransportStops = $query->fetchAll(PDO::FETCH_ASSOC);
 
-$query = $conn->prepare("SELECT * FROM route LIMIT 30,1");
+$temp_route_id = $route_id - 1;
+$query = $conn->prepare("SELECT * FROM route LIMIT " . $temp_route_id . " ,1");
 $query->execute();
 $routes = $query->fetchAll(PDO::FETCH_ASSOC);
 $busstopsforroute = array();
@@ -54,7 +58,7 @@ foreach($routes as $route){
                     array("lat"=>$stop['lat'],"lng"=>$stop['lng']));
 
                 //add bus stops in range to bus stop array
-                if($distance <= (($routePoints[$i]['location_accuracy']+$routePoints[$i+1]['location_accuracy'])/2)){
+                if($distance <= (($routePoints[$i]['location_accuracy']+$routePoints[$i+1]['location_accuracy']))){
                     if(!in_array($stop['publictransportstops_id'],$busStopArray)){
                         $busStopArray[] =  $stop['publictransportstops_id'];
                     }
@@ -156,7 +160,7 @@ foreach($busstopsforroute as $routeID => $busStopList){
         }
     }
 }
-$busServicesRouteArray = $routesAndMatchedBusServices['31'];
+$busServicesRouteArray = $routesAndMatchedBusServices[(string)$route_id];
 $allBusArray = array();
 foreach($busServicesRouteArray as $key => $valueList){
     $busArray = array();
@@ -204,7 +208,7 @@ foreach($busServicesRouteArray as $key => $valueList){
         body { height: 100%; margin: 0; padding: 0 }
 
     </style>
-    <link rel="stylesheet/less" type="text/css" href="../styles/fullmapstyles.less" />
+    <link rel="stylesheet/less" type="text/css" href="../styles/styles.less" />
     <script src="../scripts/less-1.4.1.min.js" type="text/javascript"></script>
     <script type="text/javascript"
             src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC5AN7Cbf3jecSlyOUHNNoCPE1ZJc6wGEw&sensor=true">
@@ -213,7 +217,7 @@ foreach($busServicesRouteArray as $key => $valueList){
 </head>
 <body>
 <div id='left'>
-
+    <pre><?php print_r($routesAndMatchedBusServices); ?></pre>
 </div>
 <div id="map-canvas"/>
 <script>

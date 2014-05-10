@@ -22,6 +22,10 @@ if(sizeof($sessionArray)>0){
     $sessionHash = $sessionArray[0]['session_hash'];
 }
 
+$query = $conn->prepare("SELECT DISTINCT CAST(`location_time` AS DATE ) AS uniqueDate FROM location WHERE session_hash = :session_hash ORDER BY uniqueDate;");
+$query->bindParam(":session_hash",$sessionHash);
+$query->execute();
+$uniqueDates = $query->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <html>
 <head>
@@ -65,9 +69,8 @@ if(sizeof($sessionArray)>0){
     <script src="../extruder/inc/jquery.mb.flipText.js" type="text/javascript"></script>
     <script src="../extruder/inc/mbExtruder.js" type="text/javascript"></script>
     <script type="text/javascript" src="https://www.google.com/jsapi"></script>
-    <script type="text/javascript">
-
-    </script>
+    <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/themes/smoothness/jquery-ui.css" />
+    <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/jquery-ui.min.js"></script>
     <script type="text/javascript">
         $(function(){
             $("#extruderLeft").buildMbExtruder({
@@ -208,6 +211,7 @@ if(sizeof($sessionArray)>0){
 </head>
 <body>
 <div id="left">
+    <span id='datepicker-container' style='font-size:200%'><div id="datepicker"></div></span>
     <div id="title" style="text-align: center">
         Location Viewer
         <div id="points-text" class="showPoints" style="float: right">
@@ -316,6 +320,53 @@ if(sizeof($sessionArray)>0){
             }, "json");
         }
 
+    });
+    $( "#datepicker" ).datepicker({
+        onSelect: function(date) {
+            //alert( $(this).text() +"Handler for .click() called." );
+            if(pointSelector=="Day"){
+                $.post("../services/viewer/viewPoints.php",{date:date, sessionHash:sessionHash},function( data ) {
+                    removeLine();
+                    removePoints();
+                    addPoint(data);
+                    //alert( data[0]['location_lat'] ); // John
+                    //alert( data[1] ); // 2pm
+                }, "json");
+            }
+            $.post("../services/viewer/viewByDate.php",{date:date, sessionHash:sessionHash},function( data ) {
+                var pathArray = new Array();
+                $.each(data, function(i, item){
+                    var tmpMid = item.session_hash;
+                    if(!(tmpMid in pathArray)){
+                        pathArray[tmpMid]=new Array();
+                    }
+                    pathArray[item.session_hash].push(new google.maps.LatLng(item.location_lat, item.location_lng));
+                });
+                removeLine();
+                addLine(pathArray);
+                //alert( data[0]['location_lat'] ); // John
+                //alert( data[1] ); // 2pm
+            }, "json");
+            $.post("../services/viewer/viewTimeAtPoints.php",{date:date, sessionHash:sessionHash},function( data ) {
+                //alert(data);
+                drawChart(data);
+            }, "json");
+            $.post("../services/viewer/viewTimeline.php",{date:date, sessionHash:sessionHash},function( data ) {
+                var pathArray = new Array();
+                $.each(data, function(i, item){
+                    pathArray.push(["Timeline",item.locationID,eval("new Date("+item.startTime+")"),eval("new Date("+item.endTime+")")]);
+                });
+                //alert(pathArray);
+                drawTimeline(pathArray);
+                //alert( data[0]['location_lat'] ); // John
+                //alert( data[1] ); // 2pm
+            }, "json");
+
+        },
+        dateFormat: "yy-mm-dd",
+        defaultDate: "<?php echo $uniqueDates[count($uniqueDates)-1]['uniqueDate']?>",
+        maxDate:"<?php echo $uniqueDates[count($uniqueDates)-1]['uniqueDate']?>",
+        minDate:"<?php echo $uniqueDates[0]['uniqueDate']?>"
     });
 
 </script>
