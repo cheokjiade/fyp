@@ -56,6 +56,19 @@ $uniqueDates = $query->fetchAll(PDO::FETCH_ASSOC);
             border-right:3px solid #772B14;
             background:rgba(255,255,255,.95);
         }
+        #overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 50%;
+            height: 100%;
+            background-color: #555;
+            filter:alpha(opacity=50);
+            -moz-opacity:0.5;
+            -khtml-opacity: 0.5;
+            opacity: 0.5;
+            z-index: 10000;
+        }
 
     </style>
     <link rel="stylesheet/less" type="text/css" href="../styles/styles.less" />
@@ -93,6 +106,8 @@ $uniqueDates = $query->fetchAll(PDO::FETCH_ASSOC);
         var pointSelector = "All";
         var map;
         var pathCoordinates;
+        var timeVariantModel;
+        var timeVariantModelData;
         Array.prototype.clear = function()  //Add a new method to the Array Object
         {
             var i;
@@ -206,50 +221,75 @@ $uniqueDates = $query->fetchAll(PDO::FETCH_ASSOC);
             pointInfoWindows.clear();
         }
 
+        function drawTimeVariantModel(timeline_data) {
+
+            var container = document.getElementById('timeline-timevariant');
+            timeVariantModel = new google.visualization.Timeline(container);
+            google.visualization.events.addListener(timeVariantModel, 'onmouseover', function(row) {
+                alert(JSON.stringify(timeVariantModelData[row.row]));
+            });
+            var dataTable = new google.visualization.DataTable();
+            dataTable.addColumn({ type: 'string', id: 'Day' });
+            dataTable.addColumn({ type: 'string', id: 'Activity' });
+            dataTable.addColumn({ type: 'date', id: 'Start' });
+            dataTable.addColumn({ type: 'date', id: 'End' });
+            dataTable.addRows(timeline_data);
+
+            timeVariantModel.draw(dataTable);
+        }
+
         google.maps.event.addDomListener(window, 'load', initialize);
     </script>
 </head>
 <body>
 <div id="left">
-    <span id='datepicker-container' style='font-size:200%'><div id="datepicker"></div></span>
+    <div id="accordion">
+        <h4>Summary</h4>
+        <div>
+            <div id="timeline-timevariant"  style="height: 400;"></div>
+        </div>
+        <h4>Detailed View</h4>
+        <div>
+            <div id="datelist" style="height: 230px; width:350px; padding: 0px;">
+                <!--<div id="datelist-title" style="overflow: auto";>Dates</div> -->
+                <span id='datepicker-container' style='font-size:100%'><div id="datepicker"></div></span>
+            </div>
+            <div id="details" style="height: 450px;">
+                <div id="pie-time" style="height: 350px;padding-left:10%;"></div>
+                <div id="timeline"  style="height: 100px;"></div>
+            </div>
+        </div>
+
+    </div>
     <div id="title" style="text-align: center">
-        Location Viewer
+        
         <div id="points-text" class="showPoints" style="float: right">
-            Show Points
+            
         </div>
         <div id="day-selector" class="day-selector" style="float: right">
-            Day
+            
         </div>
         <div id="all-selector" class="all-selector" style="float: right">
-            All
+           
         </div>
         <div id="radius-type-constant-selector" class="all-selector" style="float: right">
-            Constant
+           
         </div>
         <div id="radius-type-count-selector" class="all-selector" style="float: right">
-            Count
+            
         </div>
         <div id="radius-type-accuracy-selector" class="all-selector" style="float: right">
-            Accuracy
+            
         </div>
     </div>
-    <div id="datelist" style="height: 90%; float: left; white-space: nowrap; padding: 5px">
+    <!--<div id="datelist" style="height: 250px; width:350px; padding: 5px">
         <div id="datelist-title" style="overflow: auto";>Dates</div>
-        <ul>
-            <?php
-            $sql = "SELECT DISTINCT CAST(`location_time` AS DATE ) AS uniqueDate FROM location ORDER BY uniqueDate;";
-            foreach ($conn->query($sql) as $row) {
-                ?>
-                <li class="dateSelector"><?php echo $row['uniqueDate']?></li>
-            <?php
-            }
-            ?>
-        </ul>
+        <span id='datepicker-container' style='font-size:100%'><div id="datepicker"></div></span>
     </div>
-    <div id="details" style="float: right; height: 100%;">
-        <div id="pie-time" style="height: 40%;"></div>
+    <div id="details" style="height: 100%;">
+        <div id="pie-time" style="height: 40%;padding-left:0%;"></div>
         <div id="timeline"  style="height: 20%;"></div>
-    </div>
+    </div> -->
 
 </div>
 <div id="map-canvas"/>
@@ -368,7 +408,29 @@ $uniqueDates = $query->fetchAll(PDO::FETCH_ASSOC);
         maxDate:"<?php echo $uniqueDates[count($uniqueDates)-1]['uniqueDate']?>",
         minDate:"<?php echo $uniqueDates[0]['uniqueDate']?>"
     });
+    $.post("../services/viewer/viewTimeVariantModel.php",{sessionHash:sessionHash},function( data ) {
+        timeVariantModelData = new Array();
+        $.each(data, function(d, day){
+            $.each(day, function(h, hour){
+                for(var locationID in hour) break;
+                timeVariantModelData.push([d,locationID,eval("new Date(0,0,0,"+h+",0,0)"),eval("new Date(0,0,0,"+h+",59,59)")]);
+            });
 
+        });
+        //alert(pathArray);
+        drawTimeVariantModel(timeVariantModelData);
+        //alert( data[0]['location_lat'] ); // John
+        //alert( data[1] ); // 2pm
+    }, "json")
+
+    //var overlay = jQuery('<div id="overlay"> </div>');
+    //overlay.appendTo(document.body)
+    $(function() {
+        $( "#accordion" ).accordion({
+            collapsible: true,
+            heightStyle: "content"
+        });
+    });
 </script>
 </body>
 
