@@ -98,16 +98,25 @@ $uniqueDates = $query->fetchAll(PDO::FETCH_ASSOC);
         google.load("visualization", "1", {packages:["corechart","timeline"]});
         //google.setOnLoadCallback(drawChart);
         var sessionHash = "<?php echo $sessionHash; ?>";
+        var optionsSmoothened = true;
         var path = new Array();
         var colors= new Array("#FF0055","#00FF00","#0000FF","#FFFF00","#FF00FF","#FFFFFF","#000000");
         var points = [];
+        var summaryPoints = [];
         var pointInfoWindows = [];
         var pointType = "Constant";
         var pointSelector = "All";
         var map;
         var pathCoordinates;
+        var dailyTimeline;
+        var dailyTimelineData;
         var timeVariantModel;
         var timeVariantModelData;
+        var transportDetails;
+        var transportDetailsData;
+        var detailedTransportation;
+        var summaryAllLocations;
+        var summaryAllLocationsInfoWindows;
         Array.prototype.clear = function()  //Add a new method to the Array Object
         {
             var i;
@@ -125,19 +134,13 @@ $uniqueDates = $query->fetchAll(PDO::FETCH_ASSOC);
             chart.draw(data, options);
         }
 
-        function drawTimeline(timeline_data) {
-
-            var container = document.getElementById('timeline');
-            var chart = new google.visualization.Timeline(container);
-
-            var dataTable = new google.visualization.DataTable();
-            dataTable.addColumn({ type: 'string', id: 'Day' });
-            dataTable.addColumn({ type: 'string', id: 'Activity' });
-            dataTable.addColumn({ type: 'date', id: 'Start' });
-            dataTable.addColumn({ type: 'date', id: 'End' });
-            dataTable.addRows(timeline_data);
-
-            chart.draw(dataTable);
+        function drawTransportSummaryChart(chart_data){
+            var data = google.visualization.arrayToDataTable(chart_data);
+            var options = {
+                title: 'Transportation Service Summary'
+            };
+            var chart = new google.visualization.PieChart(document.getElementById('pie-transport-summary'));
+            chart.draw(data, options);
         }
 
         function initialize() {
@@ -155,6 +158,41 @@ $uniqueDates = $query->fetchAll(PDO::FETCH_ASSOC);
                 new google.maps.LatLng(-18.142599, 178.431),
                 new google.maps.LatLng(-27.46758, 153.027892)
             ];
+
+            $.post("../services/viewer/viewSummary.php",{sessionHash:sessionHash},function( data ) {
+                summaryAllLocationsInfoWindows = [];
+                summaryAllLocations = data;
+                //alert(JSON.stringify(data));
+                $.each(data, function(i, point){
+                    var tmpCircle = new google.maps.Circle({
+                        strokeColor: '#00FF00',
+                        strokeOpacity: 0.8,
+                        strokeWeight: 2,
+                        fillColor: '#00FF00',
+                        fillOpacity: 0.25,
+                        map: map,
+                        center: new google.maps.LatLng(point.lat,point.lng),
+                        radius: 40//locPoints[locPoint].population / 20
+                    });
+                    summaryPoints.push(tmpCircle);
+                    var infoWindow = new google.maps.InfoWindow({
+                        content: "<div class=\"infowindow\">" +
+                            "<div>Hours Spent : "+(parseInt(point.timeSpent)/60).toFixed(2)+"</div>" +
+                            "<div>Name : "+point.desc+" </div></div>",
+                        maxWidth: 700,
+                        position: tmpCircle.getCenter()
+                    });
+                    google.maps.event.addListener(tmpCircle, 'click', function(ev){
+                        infoWindow.setPosition(ev.latLng);
+                        infoWindow.open(map);
+                    });
+                    //infoWindow.open(map);
+                    summaryAllLocationsInfoWindows.push(infoWindow);
+                });
+
+                //alert( data[0]['location_lat'] ); // John
+                //alert( data[1] ); // 2pm
+            }, "json") ;
 
 
         }
@@ -183,6 +221,9 @@ $uniqueDates = $query->fetchAll(PDO::FETCH_ASSOC);
             path.clear();
 
         }
+
+
+
 
         function addPoint(pointArray){
             for (var i =0 ; i<pointArray.length;i++) {
@@ -221,12 +262,31 @@ $uniqueDates = $query->fetchAll(PDO::FETCH_ASSOC);
             pointInfoWindows.clear();
         }
 
+        function drawTimeline(timeline_data) {
+
+            var container = document.getElementById('timeline');
+            dailyTimeline = new google.visualization.Timeline(container);
+            google.visualization.events.addListener(dailyTimeline, 'onmouseover', function(row) {
+                map.panTo(new google.maps.LatLng(summaryAllLocations[timeline_data[row.row][1]].lat,summaryAllLocations[timeline_data[row.row][1]].lng));
+                //alert(timeVariantModelData[row.row][1]);
+            });
+            var dataTable = new google.visualization.DataTable();
+            dataTable.addColumn({ type: 'string', id: 'Day' });
+            dataTable.addColumn({ type: 'string', id: 'Activity' });
+            dataTable.addColumn({ type: 'date', id: 'Start' });
+            dataTable.addColumn({ type: 'date', id: 'End' });
+            dataTable.addRows(timeline_data);
+
+            dailyTimeline.draw(dataTable);
+        }
+
         function drawTimeVariantModel(timeline_data) {
 
             var container = document.getElementById('timeline-timevariant');
             timeVariantModel = new google.visualization.Timeline(container);
             google.visualization.events.addListener(timeVariantModel, 'onmouseover', function(row) {
-                alert(JSON.stringify(timeVariantModelData[row.row]));
+                map.panTo(new google.maps.LatLng(summaryAllLocations[timeVariantModelData[row.row][1]].lat,summaryAllLocations[timeVariantModelData[row.row][1]].lng));
+                //alert(timeVariantModelData[row.row][1]);
             });
             var dataTable = new google.visualization.DataTable();
             dataTable.addColumn({ type: 'string', id: 'Day' });
@@ -238,6 +298,20 @@ $uniqueDates = $query->fetchAll(PDO::FETCH_ASSOC);
             timeVariantModel.draw(dataTable);
         }
 
+        function drawTransportationType(timeline_data) {
+
+            var container = document.getElementById('timeline-transport-details');
+            transportDetails = new google.visualization.Timeline(container);
+            var dataTable = new google.visualization.DataTable();
+            dataTable.addColumn({ type: 'string', id: 'Route ID' });
+            dataTable.addColumn({ type: 'string', id: 'Service' });
+            dataTable.addColumn({ type: 'date', id: 'Start' });
+            dataTable.addColumn({ type: 'date', id: 'End' });
+            dataTable.addRows(timeline_data);
+
+            transportDetails.draw(dataTable);
+        }
+
         google.maps.event.addDomListener(window, 'load', initialize);
     </script>
 </head>
@@ -246,18 +320,22 @@ $uniqueDates = $query->fetchAll(PDO::FETCH_ASSOC);
     <div id="accordion">
         <h4>Summary</h4>
         <div>
-            <div id="timeline-timevariant"  style="height: 400;"></div>
+            <div id="timeline-timevariant"  style="height: 375;"></div>
+            <div id="pie-transport-summary" style="height: 200px;padding-left:10px;"></div>
         </div>
         <h4>Detailed View</h4>
         <div>
-            <div id="datelist" style="height: 230px; width:350px; padding: 0px;">
+            <div id="datelist" style="height: 240px; width:500px; padding: 0px;">
                 <!--<div id="datelist-title" style="overflow: auto";>Dates</div> -->
-                <span id='datepicker-container' style='font-size:100%'><div id="datepicker"></div></span>
+                <span id='datepicker-container' style='font-size:100%'><div id="datepicker" style="float:left;"></div></span>
+                <div style="float:right;"> Smoothened: <span id="optionSmoothenedYes"> Yes</span> <span id="optionSmoothenedNo"> No</span></div>
+
             </div>
             <div id="details" style="height: 450px;">
                 <div id="pie-time" style="height: 350px;padding-left:10%;"></div>
                 <div id="timeline"  style="height: 100px;"></div>
             </div>
+            <div id="timeline-transport-details"  style="height: 500px;"></div>
         </div>
 
     </div>
@@ -295,6 +373,12 @@ $uniqueDates = $query->fetchAll(PDO::FETCH_ASSOC);
 <div id="map-canvas"/>
 
 <script>
+    $("#optionSmoothenedYes").click(function() {
+        optionsSmoothened = true;
+    });
+    $("#optionSmoothenedNo").click(function() {
+        optionsSmoothened = false;
+    });
     $(".day-selector").click(function() {
         pointSelector = "Day";
     });
@@ -306,47 +390,6 @@ $uniqueDates = $query->fetchAll(PDO::FETCH_ASSOC);
     });
     $(".all-selector").click(function() {
         pointSelector = "All";
-    });
-    $(".dateSelector").click(function() {
-        //alert( $(this).text() +"Handler for .click() called." );
-        if(pointSelector=="Day"){
-            $.post("../services/viewer/viewPoints.php",{date:$(this).text(), sessionHash:sessionHash},function( data ) {
-                removeLine();
-                removePoints();
-                addPoint(data);
-                //alert( data[0]['location_lat'] ); // John
-                //alert( data[1] ); // 2pm
-            }, "json");
-        }
-        $.post("../services/viewer/viewByDate.php",{date:$(this).text(), sessionHash:sessionHash},function( data ) {
-            var pathArray = new Array();
-            $.each(data, function(i, item){
-                var tmpMid = item.session_hash;
-                if(!(tmpMid in pathArray)){
-                    pathArray[tmpMid]=new Array();
-                }
-                pathArray[item.session_hash].push(new google.maps.LatLng(item.location_lat, item.location_lng));
-            });
-            removeLine();
-            addLine(pathArray);
-            //alert( data[0]['location_lat'] ); // John
-            //alert( data[1] ); // 2pm
-        }, "json");
-        $.post("../services/viewer/viewTimeAtPoints.php",{date:$(this).text(), sessionHash:sessionHash},function( data ) {
-            //alert(data);
-            drawChart(data);
-        }, "json");
-        $.post("../services/viewer/viewTimeline.php",{date:$(this).text(), sessionHash:sessionHash},function( data ) {
-            var pathArray = new Array();
-            $.each(data, function(i, item){
-                pathArray.push(["Timeline",item.locationID,eval("new Date("+item.startTime+")"),eval("new Date("+item.endTime+")")]);
-            });
-            //alert(pathArray);
-            drawTimeline(pathArray);
-            //alert( data[0]['location_lat'] ); // John
-            //alert( data[1] ); // 2pm
-        }, "json");
-
     });
     $(".showPoints").click(function() {
         //alert( $(this).text() +"Handler for .click() called." );
@@ -364,14 +407,26 @@ $uniqueDates = $query->fetchAll(PDO::FETCH_ASSOC);
     $( "#datepicker" ).datepicker({
         onSelect: function(date) {
             //alert( $(this).text() +"Handler for .click() called." );
+
             if(pointSelector=="Day"){
-                $.post("../services/viewer/viewPoints.php",{date:date, sessionHash:sessionHash},function( data ) {
-                    removeLine();
-                    removePoints();
-                    addPoint(data);
-                    //alert( data[0]['location_lat'] ); // John
-                    //alert( data[1] ); // 2pm
-                }, "json");
+                if(optionsSmoothened==true){
+                    $.post("../services/viewer/viewPoints.php",{date:date, smoothen:"true", sessionHash:sessionHash},function( data ) {
+                        removeLine();
+                        removePoints();
+                        addPoint(data);
+                        //alert( data[0]['location_lat'] ); // John
+                        //alert( data[1] ); // 2pm
+                    }, "json");
+                }else{
+                    $.post("../services/viewer/viewPoints.php",{date:date, sessionHash:sessionHash},function( data ) {
+                        removeLine();
+                        removePoints();
+                        addPoint(data);
+                        //alert( data[0]['location_lat'] ); // John
+                        //alert( data[1] ); // 2pm
+                    }, "json");
+                }
+
             }
             $.post("../services/viewer/viewByDate.php",{date:date, sessionHash:sessionHash},function( data ) {
                 var pathArray = new Array();
@@ -387,17 +442,35 @@ $uniqueDates = $query->fetchAll(PDO::FETCH_ASSOC);
                 //alert( data[0]['location_lat'] ); // John
                 //alert( data[1] ); // 2pm
             }, "json");
+
             $.post("../services/viewer/viewTimeAtPoints.php",{date:date, sessionHash:sessionHash},function( data ) {
                 //alert(data);
                 drawChart(data);
             }, "json");
+
             $.post("../services/viewer/viewTimeline.php",{date:date, sessionHash:sessionHash},function( data ) {
-                var pathArray = new Array();
+                dailyTimelineData = new Array();
                 $.each(data, function(i, item){
-                    pathArray.push(["Timeline",item.locationID,eval("new Date("+item.startTime+")"),eval("new Date("+item.endTime+")")]);
+                    dailyTimelineData.push(["Timeline",item.locationID,eval("new Date("+item.startTime+")"),eval("new Date("+item.endTime+")")]);
                 });
                 //alert(pathArray);
-                drawTimeline(pathArray);
+                drawTimeline(dailyTimelineData);
+                //alert( data[0]['location_lat'] ); // John
+                //alert( data[1] ); // 2pm
+            }, "json");
+
+            $.post("../services/viewer/viewTimeAtPoints.php",{date:date, sessionHash:sessionHash},function( data ) {
+                //alert(data);
+                drawChart(data);
+            }, "json");
+
+            $.post("../services/viewer/viewTransportationDetails.php",{date:date, sessionHash:sessionHash},function( data ) {
+                detailedTransportation = new Array();
+                $.each(data, function(i, item){
+                    detailedTransportation.push([item.route_id, item.transport_id, eval("new Date(0,0,0,"+item.start+")") ,eval("new Date(0,0,0,"+item.end+")")]);
+                });
+                //alert(JSON.stringify(detailedTransportation));
+                drawTransportationType(detailedTransportation);
                 //alert( data[0]['location_lat'] ); // John
                 //alert( data[1] ); // 2pm
             }, "json");
@@ -408,6 +481,7 @@ $uniqueDates = $query->fetchAll(PDO::FETCH_ASSOC);
         maxDate:"<?php echo $uniqueDates[count($uniqueDates)-1]['uniqueDate']?>",
         minDate:"<?php echo $uniqueDates[0]['uniqueDate']?>"
     });
+
     $.post("../services/viewer/viewTimeVariantModel.php",{sessionHash:sessionHash},function( data ) {
         timeVariantModelData = new Array();
         $.each(data, function(d, day){
@@ -421,7 +495,25 @@ $uniqueDates = $query->fetchAll(PDO::FETCH_ASSOC);
         drawTimeVariantModel(timeVariantModelData);
         //alert( data[0]['location_lat'] ); // John
         //alert( data[1] ); // 2pm
-    }, "json")
+    }, "json");
+
+    $.post("../services/viewer/viewTransportationSummary.php",{sessionHash:sessionHash},function( data ) {
+        var transportationSummaryData = [];
+        var titleArray = [];
+        titleArray.push("Service");
+        titleArray.push("Trips");
+        transportationSummaryData.push(titleArray);
+        $.each(data, function(i, transport){
+            var tmpArray = [];
+            tmpArray.push(transport.publictransportservices_id);
+            tmpArray.push(Number(transport.count));
+            transportationSummaryData.push(tmpArray);
+        });
+        //alert(pathArray);
+        drawTransportSummaryChart(transportationSummaryData);
+        //alert( data[0]['location_lat'] ); // John
+        //alert( data[1] ); // 2pm
+    }, "json");
 
     //var overlay = jQuery('<div id="overlay"> </div>');
     //overlay.appendTo(document.body)
@@ -431,6 +523,38 @@ $uniqueDates = $query->fetchAll(PDO::FETCH_ASSOC);
             heightStyle: "content"
         });
     });
+
+    function addSummaryPoint(pointArray){
+        summaryAllLocationsInfoWindows = [];
+
+        $.each(pointArray, function(d, point){
+            var tmpCircle = new google.maps.Circle({
+                strokeColor: '#00FF00',
+                strokeOpacity: 0.8,
+                strokeWeight: 2,
+                fillColor: '#00FF00',
+                fillOpacity: 0.25,
+                map: map,
+                center: new google.maps.LatLng(point.lat,point.lng),
+                radius: 40//locPoints[locPoint].population / 20
+            });
+            summaryPoints.push(tmpCircle);
+            var infoWindow = new google.maps.InfoWindow({
+                content: "<div class=\"infowindow\">" +
+                    "<div>Hours Spent : "+(parseInt(point.timeSpent)/60).toFixed(2)+"</div>" +
+                    "<div>Name : "+point.desc+" </div></div>",
+                maxWidth: 700,
+                position: tmpCircle.getCenter()
+            });
+            google.maps.event.addListener(tmpCircle, 'click', function(ev){
+                infoWindow.setPosition(ev.latLng);
+                infoWindow.open(map);
+            });
+            //infoWindow.open(map);
+            summaryAllLocationsInfoWindows.push(infoWindow);
+
+    });
+    }
 </script>
 </body>
 
