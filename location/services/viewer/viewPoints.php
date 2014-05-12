@@ -9,6 +9,7 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 'On');
 require_once('../../db/conn.php');
+require_once('../../util/others.php');
 $sessionHash = $_REQUEST['sessionHash'];
 $returnArray = "";
 if(isset($_REQUEST['date'])){
@@ -23,7 +24,8 @@ if(isset($_REQUEST['date'])){
     $query->bindParam(":dateStart",$dateStart);
     $query->bindParam(":dateEnd",$dateEnd);
     $query->execute();
-    $returnArray = $query->fetchAll(PDO::FETCH_ASSOC);
+    $returnArray = smoothPoints($query->fetchAll(PDO::FETCH_ASSOC));
+
 }else{
     $query = $conn->prepare("SELECT *,stoppoint_center_lat as lat,stoppoint_center_lng as lng, stoppoint_accuracy as acc, COUNT(stop_time) AS count, SUM(stop_time) AS totaltime FROM
         (SELECT *, time_to_sec(timediff(stoppoint_end_time,stoppoint_start_time))/60 AS stop_time FROM fyp.stoppoint WHERE session_hash = :sessionHash) st
@@ -31,7 +33,7 @@ if(isset($_REQUEST['date'])){
         ORDER BY SUM(stop_time) DESC");
     $query->bindParam(":sessionHash",$sessionHash);
     $query->execute();
-    $returnArray = $query->fetchAll(PDO::FETCH_ASSOC);
+    $returnArray = smoothPoints($query->fetchAll(PDO::FETCH_ASSOC));
 }
 print json_encode($returnArray);
 $conn = null;

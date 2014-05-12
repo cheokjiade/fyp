@@ -117,6 +117,7 @@ $uniqueDates = $query->fetchAll(PDO::FETCH_ASSOC);
         var detailedTransportation;
         var summaryAllLocations;
         var summaryAllLocationsInfoWindows;
+        var transportationPathsArray;
         Array.prototype.clear = function()  //Add a new method to the Array Object
         {
             var i;
@@ -302,6 +303,24 @@ $uniqueDates = $query->fetchAll(PDO::FETCH_ASSOC);
 
             var container = document.getElementById('timeline-transport-details');
             transportDetails = new google.visualization.Timeline(container);
+            google.visualization.events.addListener(transportDetails, 'onmouseover', function(row) {
+                //alert(transportationPathsArray);
+                var pathArray = new Array();
+                var tmpID = timeline_data[row.row][0];
+                $.each(transportationPathsArray, function(i, item){
+                    //echo(item.publictransportservices_id);
+                    var tmpMid = timeline_data[row.row][0] + "_" + item.publictransportservices_id;
+                    if(!(tmpMid in pathArray)){
+                        pathArray[tmpMid]=new Array();
+                    }if(item.route_id == tmpID){
+                        pathArray[tmpMid].push(new google.maps.LatLng(item.lat, item.lng));
+                    }
+
+                });
+                removeLine();
+                addLine(pathArray);
+                //alert(timeVariantModelData[row.row][1]);
+            });
             var dataTable = new google.visualization.DataTable();
             dataTable.addColumn({ type: 'string', id: 'Route ID' });
             dataTable.addColumn({ type: 'string', id: 'Service' });
@@ -328,11 +347,10 @@ $uniqueDates = $query->fetchAll(PDO::FETCH_ASSOC);
             <div id="datelist" style="height: 240px; width:500px; padding: 0px;">
                 <!--<div id="datelist-title" style="overflow: auto";>Dates</div> -->
                 <span id='datepicker-container' style='font-size:100%'><div id="datepicker" style="float:left;"></div></span>
-                <div style="float:right;"> Smoothened: <span id="optionSmoothenedYes"> Yes</span> <span id="optionSmoothenedNo"> No</span></div>
-
+                <!--<div style="float:right;"> Smoothened: <span id="optionSmoothenedYes"> Yes</span> <span id="optionSmoothenedNo"> No</span></div> -->
             </div>
-            <div id="details" style="height: 450px;">
-                <div id="pie-time" style="height: 350px;padding-left:10%;"></div>
+            <div id="details" style="height: 120px;">
+                <!--<div id="pie-time" style="height: 350px;padding-left:10%;"></div>-->
                 <div id="timeline"  style="height: 100px;"></div>
             </div>
             <div id="timeline-transport-details"  style="height: 500px;"></div>
@@ -443,10 +461,10 @@ $uniqueDates = $query->fetchAll(PDO::FETCH_ASSOC);
                 //alert( data[1] ); // 2pm
             }, "json");
 
-            $.post("../services/viewer/viewTimeAtPoints.php",{date:date, sessionHash:sessionHash},function( data ) {
+            /*$.post("../services/viewer/viewTimeAtPoints.php",{date:date, sessionHash:sessionHash},function( data ) {
                 //alert(data);
                 drawChart(data);
-            }, "json");
+            }, "json");   */
 
             $.post("../services/viewer/viewTimeline.php",{date:date, sessionHash:sessionHash},function( data ) {
                 dailyTimelineData = new Array();
@@ -459,9 +477,14 @@ $uniqueDates = $query->fetchAll(PDO::FETCH_ASSOC);
                 //alert( data[1] ); // 2pm
             }, "json");
 
-            $.post("../services/viewer/viewTimeAtPoints.php",{date:date, sessionHash:sessionHash},function( data ) {
+            /*$.post("../services/viewer/viewTimeAtPoints.php",{date:date, sessionHash:sessionHash},function( data ) {
                 //alert(data);
-                drawChart(data);
+                //drawChart(data);
+            }, "json");  */
+
+            $.post("../services/viewer/viewTransportationPaths.php",{date:date, sessionHash:sessionHash},function( data ) {
+                //alert(data);
+                transportationPathsArray = data;
             }, "json");
 
             $.post("../services/viewer/viewTransportationDetails.php",{date:date, sessionHash:sessionHash},function( data ) {

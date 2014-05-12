@@ -57,7 +57,15 @@ $returnArray = $query->fetchAll(PDO::FETCH_ASSOC);
 </head>
 <body>
 <div id='left'>
+    <table>
+        <?php foreach($returnArray as $point) { ?>
+        <tr>
+            <td><?php echo $point['location_time']; ?></td>
+            <td class="locationSelector"><?php echo $point['location_lat'].','.$point['location_lng']; ?></td>
+        </tr>
 
+    <?php } ?>
+    </table>
 </div>
 <div id="map-canvas"/>
 <script>
@@ -66,6 +74,7 @@ $returnArray = $query->fetchAll(PDO::FETCH_ASSOC);
     var locPoints = [];
     var pointsAcc = [];
     var pathArray = [];
+    var map;
     <?php
         foreach($returnArray as $point) {
     ?>
@@ -84,7 +93,7 @@ $returnArray = $query->fetchAll(PDO::FETCH_ASSOC);
             mapTypeId: google.maps.MapTypeId.ROADMAP
         };
 
-        var map = new google.maps.Map(document.getElementById('map-canvas'),
+        map = new google.maps.Map(document.getElementById('map-canvas'),
             mapOptions);
 
         var flightPath = new google.maps.Polyline({
@@ -133,6 +142,20 @@ $returnArray = $query->fetchAll(PDO::FETCH_ASSOC);
     }
 
     google.maps.event.addDomListener(window, 'load', initialize);
+
+    $(".locationSelector").click(function() {
+        var tmpCircle = new google.maps.Circle({
+            strokeColor: '#00FF00',
+            strokeOpacity: 0.8,
+            strokeWeight: 2,
+            fillColor: '#00FF00',
+            fillOpacity: 0.25,
+            map: map,
+            center: new google.maps.LatLng(Number($(this).text().split(',')[0]),Number($(this).text().split(',')[1])),
+            radius: 100//locPoints[locPoint].population / 20
+        });
+        points.push(tmpCircle);
+    });
 </script>
 </body>
 </html>

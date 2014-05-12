@@ -32,7 +32,7 @@ $query->bindParam(":route_id",$route_id);
 $query->execute();
 $returnArray = $query->fetchAll(PDO::FETCH_ASSOC);
 
-$query = $conn->prepare("SELECT publictransportstops_id, publictransportstops_lat AS lat, publictransportstops_lng AS lng FROM publictransportstops;;");
+$query = $conn->prepare("SELECT publictransportstops_id, publictransportstops_lat AS lat, publictransportstops_lng AS lng, publictransportstops_radius AS radius FROM publictransportstops;;");
 $query->execute();
 $publicTransportStops = $query->fetchAll(PDO::FETCH_ASSOC);
 
@@ -58,15 +58,14 @@ foreach($routes as $route){
                     array("lat"=>$stop['lat'],"lng"=>$stop['lng']));
 
                 //add bus stops in range to bus stop array
-                if($distance <= (($routePoints[$i]['location_accuracy']+$routePoints[$i+1]['location_accuracy']))){
+                if($distance <= (($routePoints[$i]['location_accuracy']+$routePoints[$i+1]['location_accuracy']+$stop['radius']/3))){
                     if(!in_array($stop['publictransportstops_id'],$busStopArray)){
                         $busStopArray[] =  $stop['publictransportstops_id'];
+                        //echo $stop['publictransportstops_id'] . ' ';
                     }
                 }
             }
-
         }
-
     }
     $busstopsforroute[$route['route_id']] = $busStopArray;
 
@@ -171,6 +170,25 @@ foreach($busServicesRouteArray as $key => $valueList){
         $busArray[] = $query->fetch(PDO::FETCH_ASSOC);
     }
     $allBusArray[] = $busArray;
+}
+
+$maxBusStops = 0;
+foreach($routesAndMatchedBusServices[$route_id] as $service){
+    //echo count($service) , " ";
+    if(count($service)>$maxBusStops){
+        $maxBusStops = count($service);
+    }
+}
+//echo '<br><br>';
+foreach($routesAndMatchedBusServices[$route_id] as $serviceID => $serviceStops){
+    //echo $serviceID . "-" . count($serviceStops). "   ";
+    if(count($serviceStops)>4 && count($serviceStops)==$maxBusStops){
+        $serviceDetails = explode(";",$serviceID);
+        if($serviceDetails[0]==25 || $serviceDetails[0]==132 || $serviceDetails[0]==101 || $serviceDetails[0]==81){
+            echo $route_id . ":". $serviceDetails[0] . " " . $serviceDetails[1];
+            break;
+        }
+    }
 }
 //for($i=0;$i<sizeof($returnArray);$i+=1){
 //    $nearestPoint = 1000;

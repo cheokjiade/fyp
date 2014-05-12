@@ -28,6 +28,15 @@ function distance($lat1, $lon1, $lat2, $lon2/*, $unit*/) {
 //    }
 }
 
+function totalDistance($locationArray){
+    $totalDistance = 0;
+    for($i=0;$i<count($locationArray)-1;$i+=1){
+        $totalDistance+=distance($locationArray[$i]['location_lat'],$locationArray[$i]['location_lng'],$locationArray[$i+1]['location_lat'],$locationArray[$i+1]['location_lng']);
+    }
+
+    return $totalDistance;
+}
+
 function timeDifference($strTime1,$strTime2){
     $time1 = new DateTime($strTime1);
     $time2 = new DateTime($strTime2);
